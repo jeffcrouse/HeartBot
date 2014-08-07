@@ -12,7 +12,7 @@ String props = "bot.properties";
  ╚═╗├┤ │││└─┐│ │├┬┘  ╚═╗ │ │ │├┤ ├┤ 
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
-boolean useSensor = false;
+boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
 Serial sPort;
 //String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
 String sPortName = "/dev/tty.usbmodem1411";
@@ -136,7 +136,9 @@ void draw() {
 
 // ---------------------------------------------------------------
 void mousePressed() {
-  movePlatform(mouseX, mouseY);
+  float x = map(mouseX, 0, width, 0, 1);
+  float y = map(mouseY, 0, height, 0, 1);
+  movePlatform(x, y);
 }
 
 
@@ -216,10 +218,8 @@ void platformUp() {
 }
 
 
-void movePlatform(int x, int y) {
-  float _x = map(x, 0, width, 0, 1);
-  float _y = map(y, 0, height, 0, 1);
-  println("Moving to "+_x+", "+_y);
+void movePlatform(float x, float y) {
+  println("Moving to "+x+", "+y);
 }
 
 void startNewDrawing() {
@@ -227,5 +227,6 @@ void startNewDrawing() {
 }
 
 void resetPlatform() {
+  movePlatform(0.5, 1);
 }
 

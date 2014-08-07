@@ -33,7 +33,6 @@ int ButtonLast = 1;  // Button signal as of last pre() - used to determine chang
 
 
 
-
 /*************************************
  ╦═╗┌─┐┌┐ ┌─┐┌┬┐  ╔═╗┌┬┐┬ ┬┌─┐┌─┐
  ╠╦╝│ │├┴┐│ │ │   ╚═╗ │ │ │├┤ ├┤ 
@@ -57,8 +56,15 @@ void setup() {
   println("Loading Properties to "+props);
 
   cp5.addSlider("StdDevThresh")
-    .setPosition(10, 20)
-      .setRange(100, 300);
+    .setBroadcast(false)
+      .setPosition(10, 20)
+        .setSize(300, 20)
+          .setRange(100, 300)
+            .setNumberOfTickMarks(7)
+              .setValue(200);
+
+
+
 
   cp5.loadProperties(props);
 
@@ -68,7 +74,10 @@ void setup() {
   sPort.clear();            // flush buffer
   sPort.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
 
+
   buttonLightOff();
+  resetPlatform();
+  
 }
 
 
@@ -178,6 +187,8 @@ void serialEvent(Serial port) {
 
 
 
+
+
 //----------------------------------------------------
 void sensorSerialEvent(String inData) {
   if (inData.charAt(0) == 'S') {          // leading 'S' for sensor data
@@ -240,7 +251,6 @@ void crunchSensorData() {
 // ---------------------------------------------------------------
 void drawSignal() {
   pushStyle(); 
-  color c;
   if (StdDevThreshCounter>200) {
     stroke(#00FF00);
   } else {
@@ -278,20 +288,18 @@ void drawHeart(int x, int y) {
 
 
 /**********************************
-╔╗ ┬ ┬┌┬┐┌┬┐┌─┐┌┐┌  ╔═╗┌┬┐┬ ┬┌─┐┌─┐
-╠╩╗│ │ │  │ │ ││││  ╚═╗ │ │ │├┤ ├┤ 
-╚═╝└─┘ ┴  ┴ └─┘┘└┘  ╚═╝ ┴ └─┘└  └  
-**********************************/
+ ╔╗ ┬ ┬┌┬┐┌┬┐┌─┐┌┐┌  ╔═╗┌┬┐┬ ┬┌─┐┌─┐
+ ╠╩╗│ │ │  │ │ ││││  ╚═╗ │ │ │├┤ ├┤ 
+ ╚═╝└─┘ ┴  ┴ └─┘┘└┘  ╚═╝ ┴ └─┘└  └  
+ **********************************/
 
 
 //----------------------------------------------------
 void onButtonUp() {
   println("Button Up");
   if (heartbeatPresent()) {
-    
   }
 }
-
 
 //----------------------------------------------------
 void onButtonDown() {
@@ -306,7 +314,6 @@ void buttonLightOn() {
   sPort.write("\n");
 }
 
-
 //----------------------------------------------------
 void buttonLightOff() {
   //println("Light Off");
@@ -314,4 +321,25 @@ void buttonLightOff() {
   sPort.write("0");
   sPort.write("\n");
 }
+
+
+/**********************************
+ ╔═╗┌─┐┌┐┌  ╔═╗┌─┐┌┬┐┌┬┐┌─┐┌┐┌┌┬┐┌─┐
+ ╠═╝├┤ │││  ║  │ │││││││├─┤│││ ││└─┐
+ ╩  └─┘┘└┘  ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
+ **********************************/
+
+
+
+
+/***************************************
+ ╔╦╗┌─┐┬  ┬┌─┐  ╔═╗┌─┐┌┬┐┌┬┐┌─┐┌┐┌┌┬┐┌─┐
+ ║║║│ │└┐┌┘├┤   ║  │ │││││││├─┤│││ ││└─┐
+ ╩ ╩└─┘ └┘ └─┘  ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
+ ***************************************/
+
+void resetPlatform() {
+  
+}
+
 

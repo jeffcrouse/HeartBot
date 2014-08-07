@@ -11,7 +11,6 @@ void onButtonUp() {
   println("Button Up");
   if (heartbeatPresent() && !drawingInProgress) {
     startNewDrawing();
-    drawingInProgress = true;
   }
 }
 

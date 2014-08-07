@@ -194,6 +194,13 @@ void serialEvent(Serial port) {
  ╩  └─┘┘└┘  ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
  **********************************/
 
+// ??  just guessing here
+void penOneUp() {
+}
+
+void penOneDown() {
+}
+
 
 
 
@@ -203,11 +210,19 @@ void serialEvent(Serial port) {
  ╩  ┴─┘┴ ┴ ┴ └  └─┘┴└─┴ ┴  ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
  **************************************************/
 
+void platformUp() {
+}
+
+
 void movePlatform(int x, int y) {
-  println("Moving to "+x+", "+y);
+  float _x = map(x, 0, width, 0, 1);
+  float _y = map(y, 0, height, 0, 1);
+  println("Moving to "+_x+", "+_y);
 }
 
 void startNewDrawing() {
+  drawingInProgress = true;
+  
 }
 
 void resetPlatform() {

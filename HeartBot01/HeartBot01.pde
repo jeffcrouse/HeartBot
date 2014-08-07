@@ -12,7 +12,10 @@ String props = "bot.properties";
  ╚═╗├┤ │││└─┐│ │├┬┘  ╚═╗ │ │ │├┤ ├┤ 
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
+boolean useSensor = false;
 Serial sPort;
+//String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
+String sPortName = "/dev/tty.usbmodem1411";
 
 int Sensor;      // HOLDS PULSE SENSOR DATA FROM ARDUINO
 int IBI;         // HOLDS TIME BETWEN HEARTBEATS FROM ARDUINO
@@ -26,8 +29,6 @@ float Mean;              // The average of all of the samples in the Signal Arra
 float StdDev;            // The standard deviation of the "raw" sensor data
 int StdDevThresh = 200;  // A standard deviation above 200 means that there is some kind of activity.
 int StdDevThreshCounter = 0;  // If the standard deviation stays high for a while, we probably have a heartbeat
-
-ArrayList<Integer> BPMHistory = new ArrayList<Integer>();
 
 int Button = 1;      // Current Button Signal (updated in serialEvent)
 int ButtonLast = 1;  // Button signal as of last pre() - used to determine change events
@@ -71,12 +72,13 @@ void setup() {
 
   println(Serial.list());
 
-  sPort = new Serial(this, "/dev/tty.usbmodem1411", 115200); 
-  sPort.clear();            // flush buffer
-  sPort.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
+  if (useSensor) {
+    sPort = new Serial(this, sPortName, 115200); 
+    sPort.clear();            // flush buffer
+    sPort.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
+    buttonLightOff();
+  }
 
-
-  buttonLightOff();
   resetPlatform();
 }
 
@@ -174,7 +176,7 @@ void serialEvent(Serial port) {
     inData = trim(inData);
     if (inData.length()==0) return;
 
-    if (port==sPort) {
+    if (useSensor && port==sPort) {
       sensorSerialEvent(inData);
     }
   } 
@@ -222,7 +224,6 @@ void movePlatform(int x, int y) {
 
 void startNewDrawing() {
   drawingInProgress = true;
-  
 }
 
 void resetPlatform() {

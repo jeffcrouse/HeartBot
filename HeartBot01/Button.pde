@@ -21,6 +21,8 @@ void onButtonDown() {
 
 //----------------------------------------------------
 void buttonLightOn() {
+  if(!useSensor) return;
+  
   //println("Light On");
   //port.write("L");
   sPort.write("1");
@@ -29,6 +31,7 @@ void buttonLightOn() {
 
 //----------------------------------------------------
 void buttonLightOff() {
+  if(!useSensor) return;
   //println("Light Off");
   //port.write("L");
   sPort.write("0");

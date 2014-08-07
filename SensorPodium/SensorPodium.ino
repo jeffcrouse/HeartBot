@@ -27,7 +27,6 @@
  
  */
 
-
 //  VARIABLES
 int pulsePin = 0;                 // Pulse Sensor purple wire connected to analog pin 0
 int blinkPin = 13;                // pin to blink led at each beat
@@ -35,7 +34,7 @@ int fadePin = 5;                  // pin to do fancy classy fading blink at each
 int fadeRate = 0;                 // used to fade LED on with PWM on fadePin
 
 int buttonInputPin = 8;
-int lightOutputPin = 12;
+int lightOutputPin = 4;
 
 // these variables are volatile because they are used during the interrupt service routine!
 volatile int BPM;                   // used to hold the pulse rate
@@ -48,15 +47,15 @@ String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 
 
-
 void setup(){
   pinMode(blinkPin,OUTPUT);         // pin that will blink to your heartbeat!
   pinMode(fadePin,OUTPUT);          // pin that will fade to your heartbeat!
-
+   
   pinMode(buttonInputPin, INPUT_PULLUP);
   pinMode(lightOutputPin, OUTPUT);
+
   //digitalWrite(lightOutputPin, 1);
-  
+
   Serial.begin(115200);             // we agree to talk fast!
   interruptSetup();                 // sets up to read Pulse Sensor signal every 2mS 
   // UN-COMMENT THE NEXT LINE IF YOU ARE POWERING The Pulse Sensor AT LOW VOLTAGE, 
@@ -84,14 +83,14 @@ void loop(){
   sendDataToProcessing('P', buttonState);  // will send B0 if pressed, B1 if not pressed
 
   if (stringComplete) {
-    
+
     if(inputString=="1\n") {
-       digitalWrite(lightOutputPin, 1);
+      digitalWrite(lightOutputPin, 1);
     }
     if(inputString=="0\n") {
-       digitalWrite(lightOutputPin, 0);
+      digitalWrite(lightOutputPin, 0);
     }
-
+   
     // clear the string:
     inputString = "";
     stringComplete = false;
@@ -134,6 +133,9 @@ void sendDataToProcessing(char symbol, int data ){
   Serial.print(symbol);                // symbol prefix tells Processing what type of data is coming
   Serial.println(data);                // the data to send culminating in a carriage return
 }
+
+
+
 
 
 

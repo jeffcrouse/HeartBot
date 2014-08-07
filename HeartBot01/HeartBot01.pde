@@ -95,8 +95,9 @@ void pre() {
     if (heartbeatPresent()) buttonLightOn();
     beat = false;
   }
+  
   beatCounter--;
-  if (beatCounter == 0 || !heartbeatPresent()) {
+  if (beatCounter == 0) {
     buttonLightOff();
   }
 

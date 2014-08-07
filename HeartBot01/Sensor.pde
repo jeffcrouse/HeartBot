@@ -60,8 +60,12 @@ void crunchSensorData() {
   // Update StdDevThreshCounter
   if (StdDev > StdDevThresh) {
     StdDevThreshCounter++;
+    if(heartbeatPresent()) {
+      //ledOn();
+    }
   } else {
     StdDevThreshCounter=0;
+    //ledOff();
   }
 }
 

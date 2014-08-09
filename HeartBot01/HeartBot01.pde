@@ -7,13 +7,14 @@ String props = "bot.properties";
 
 
 
+
 /*********************************
  ╔═╗┌─┐┌┐┌┌─┐┌─┐┬─┐  ╔═╗┌┬┐┬ ┬┌─┐┌─┐
  ╚═╗├┤ │││└─┐│ │├┬┘  ╚═╗ │ │ │├┤ ├┤ 
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
 boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
-boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
+boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
 
 Serial sPort;
 //String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
@@ -43,6 +44,18 @@ int ButtonLast = 1;  // Button signal as of last pre() - used to determine chang
  ╩╚═└─┘└─┘└─┘ ┴   ╚═╝ ┴ └─┘└  └  
  *************************************/
 
+class PlatformCommand {
+  PlatformCommand(PVector location, float speed) {
+    this.location = location;
+    this.speed = speed;
+  }
+  PVector location;
+  float speed;
+}
+
+ArrayList<PlatformCommand> commands = new ArrayList<PlatformCommand>();
+
+
 
 // For you, Ranjit
 
@@ -70,8 +83,8 @@ String TINYG_INITIALIZERS[] = {
   "$1mi=8", 
   "$2mi=8", 
 
-  "G90",    // absolute positioning mode
-  
+  "G90", // absolute positioning mode
+
   "$qv=1"    // verbose queue reports
 };
 
@@ -105,7 +118,7 @@ float XY[] = {
 // IT TAKES ABOUT 20 SECONDS
 void hektorSetup() {
   if (!useHektor) return;
-  
+
   tinyg = new Serial(this, TINYG_SERIAL_PORT, TINYG_SERIAL_SPEED);
 
   for (int i=0; i<TINYG_INITIALIZERS.length; i++) {
@@ -114,12 +127,11 @@ void hektorSetup() {
     println("Sending: " + TINYG_INITIALIZERS[i]);
     delay(500);
   }
-
 }
 
 void hektorGotoXY(float X, float Y) {
   if (!useHektor) return;
-  
+
   if (!hektor_homed) {
     println("NOT HOMED!");
     return;
@@ -135,7 +147,7 @@ void hektorGotoXY(float X, float Y) {
 
 void hektorSetHome() {
   if (!useHektor) return;
-  
+
   XY[0] = HOME_XY[0];
   XY[1] = HOME_XY[1];
 
@@ -149,7 +161,7 @@ void hektorSetHome() {
 
 void hektorJog(float dx, float dy) {
   if (!useHektor) return;
-    
+
   XY[0] += dx * jog;
   XY[1] += dy * jog;
   hektorGotoXY(XY[0], XY[1]);
@@ -169,7 +181,7 @@ void hektorSerialEvent(String data) {
 // ---------------------------------------------------------------
 void setup() {
   hektorSetup(); // takes 20-30 seconds!
-  
+
   size(700, 600);  // Stage size
   frameRate(100);  
   smooth();
@@ -226,6 +238,28 @@ void pre() {
     if (Button==0) onButtonDown();
     else onButtonUp();
     ButtonLast = Button;
+  }
+
+  if (hektorQueueLength < 20 && commands.size() > 0) {
+    PlatformCommand c = commands.get(0);
+    movePlatform(c.location.x, c.location.y, c.speed);
+    commands.remove(0);
+  }
+  if (drawingLine && hektorQueueLength==0) {
+    drawingLine = false;
+
+    float radius = random(0.01, 0.1);
+    PVector center = new PVector();
+    center.x = start.x + cos(radians(-45)) * (dist+radius);
+    center.y = start.y + cos(radians(-45)) * (dist+radius);
+
+    float inc = radians(360) / 40.0;
+    for (float angle = 0; angle < radians (360); angle+=inc) {
+      PVector p = new PVector();
+      p.x = center.x + cos(angle) * radius;
+      p.y = center.y + sin(angle) * radius;
+      commands.add( new PlatformCommand(p, 1.0) );
+    }
   }
 }
 
@@ -293,7 +327,7 @@ void keyPressed() {
   case 'H':
     hektorSetHome();
     break;
-  
+
   default:
     break;
   }
@@ -303,16 +337,16 @@ void keyPressed() {
   if (key==CODED) {
     switch(keyCode) {
     case UP:
-      hektorJog(0,-1);
+      hektorJog(0, -1);
       break;
     case DOWN:
-      hektorJog(0,1);
+      hektorJog(0, 1);
       break;
     case LEFT:
-      hektorJog(-1,0);
+      hektorJog(-1, 0);
       break;
     case RIGHT:
-      hektorJog(1,0);
+      hektorJog(1, 0);
       break;
     }
   }
@@ -366,40 +400,40 @@ void penOneDown() {
  **************************************************/
 
 
-
-
+PVector start = new PVector();
+PVector end = new PVector();
+float dist;
+boolean drawingLine = false;
 
 void drawLine() {
-  float angle = radians(-45);
-  PVector start = new PVector();
-  PVector end = new PVector();
-  float dist;
 
   do {
     start.x = random(0.1, 0.4);
     start.y = random(0.5, 0.9);
     dist = random(0.4, 1);
 
-    end.x = start.x + cos(angle) * dist;
-    end.y = start.y + sin(angle) * dist;
-  }
+    end.x = start.x + cos(radians(-45)) * dist;
+    end.y = start.y + sin(radians(-45)) * dist;
+  } 
   while (end.x > 0.8 || end.y < 0.2);
 
-  println(start);
-  println(end);
-}
-
-void platformUp() {
+  commands.add( new PlatformCommand(start, 0.5) );
+  commands.add( new PlatformCommand(end, 0.5) );
+  drawingLine = true;
 }
 
 
 // x, y in range 0.0 to 1.0
-void movePlatform(float x, float y) {
+void movePlatform(float x, float y, float speed) {
   float platformX = x * 72 + 24;
   float platformY = y * 72 + 24;
-  
+
   println("Hektor to "+x+", "+y + ", => " + platformX + ", " + platformY + " - enabled? " + useHektor);
   hektorGotoXY(platformX, platformY);
+}
+
+void movePlatform(float x, float y) {
+  movePlatform(x, y, 0.5);
 }
 
 void startNewDrawing() {
@@ -408,6 +442,6 @@ void startNewDrawing() {
 
 /*
 void resetPlatform() {
-  movePlatform(0.5, 1);
-}
-*/
+ movePlatform(0.5, 1);
+ }
+ */

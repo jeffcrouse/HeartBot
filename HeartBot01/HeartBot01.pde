@@ -84,6 +84,8 @@ String TINYG_INITIALIZERS[] = {
   "$2mi=8", 
 
   "G90", // absolute positioning mode
+  
+  "G61.1",  // smooth path mode
 
   "$qv=1"    // verbose queue reports
 };

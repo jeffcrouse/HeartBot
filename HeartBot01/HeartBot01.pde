@@ -95,7 +95,7 @@ void pre() {
     if (heartbeatPresent()) buttonLightOn();
     beat = false;
   }
-  
+
   beatCounter--;
   if (beatCounter == 0) {
     buttonLightOff();
@@ -118,6 +118,7 @@ void draw() {
   noStroke();
 
   String msg[] = {
+    "FrameRate = "+int(frameRate), 
     "BPM = "+BPM, 
     "IBI = "+IBI, 
     "Signal = "+Sensor, 
@@ -155,6 +156,10 @@ void keyPressed() {
   case 's':
     println("Saving Properties to "+props);
     cp5.saveProperties(props);
+    break;
+
+  case 'l':
+    drawLine();
     break;
 
   case '0':
@@ -215,8 +220,34 @@ void penOneDown() {
  ╩  ┴─┘┴ ┴ ┴ └  └─┘┴└─┴ ┴  ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
  **************************************************/
 
+
+
+
+
+void drawLine() {
+  float angle = radians(-45);
+  PVector start = new PVector();
+  PVector end = new PVector();
+  float dist;
+
+  do {
+    start.x = random(0.1, 0.4);
+    start.y = random(0.5, 0.9);
+    dist = random(0.4, 1);
+
+    end.x = start.x + cos(angle) * dist;
+    end.y = start.y + sin(angle) * dist;
+  }
+  while (end.x > 0.8 || end.y < 0.2);
+
+  println(start);
+  println(end);
+}
+
 void platformUp() {
 }
+
+
 
 
 void movePlatform(float x, float y) {

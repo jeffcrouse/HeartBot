@@ -13,7 +13,7 @@ String props = "bot.properties";
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
 boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
-boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
+boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
 
 Serial sPort;
 //String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
@@ -155,6 +155,25 @@ void hektorJog(float dx, float dy) {
   hektorGotoXY(XY[0], XY[1]);
 }
 
+// approximate movement by using raw motor commands, for when it's not calibrated yet
+void hektorJogRaw(float dx, float dy) {
+  if (!useHektor) return;
+  
+  float hx=0, hy=0;
+  if (dx != 0) {
+    hx = REVERSE * dx;
+    hy = REVERSE * dx;
+  }
+  else if (dy != 0) {
+    hx = REVERSE * -dy;
+    hy = REVERSE * dy;
+  }
+    
+  tinyg.write("G91\n"); // relative coordinates
+  tinyg.write("G0 X" + hx + " Y" + hy + "\n");
+  tinyg.write("G90\n"); // back to absolute coords
+}
+
 void hektorSerialEvent(String data) {
   //println("Hektor serial event " + data);
   String[] m = match(data, "qr:(\\d+)");
@@ -285,6 +304,33 @@ void keyPressed() {
     buttonLightOn();
     break;
 
+  case 'I':
+    hektorJogRaw(0,-1);
+    break;
+  case 'J':
+    hektorJogRaw(-1,0);
+    break;
+  case 'K':
+    hektorJogRaw(0,1);
+    break;
+  case 'L':
+    hektorJogRaw(1,0);
+    break;
+
+  case 'i':
+    hektorJogRaw(0,-5);
+    break;
+  case 'j':
+    hektorJogRaw(-5,0);
+    break;
+  case 'k':
+    hektorJogRaw(0,5);
+    break;
+  case 'l':
+    hektorJogRaw(5,0);
+    break;
+
+  
   case 'H':
     hektorSetHome();
     break;

@@ -14,7 +14,7 @@ String props = "bot.properties";
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
 boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
-boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
+boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
 
 Serial sPort;
 //String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
@@ -249,49 +249,31 @@ void pre() {
     else onButtonUp();
     ButtonLast = Button;
   }
-  
-  if(hektorQueueLength < 19) {
+
+  if (hektorQueueLength < 19 && moves.size() > 0) {
     movePlatform(moves.get(0).x, moves.get(0).y, 0.5);
     moves.remove(0);
   }
-
-  switch(commands.get(0)) {
-  case "pen1 up":
-
-    break;
-  case "pen2 up":
-
-    break;
-  case "pen1 down":
-
-    break;
-  case "pen2 down":
-    break;
-    
-  case "goto start":
-    movePlatform(start.x, start.y, 0.5);
-    commands.remove(0);
-    break;
-    
-  case "goto end":
-    movePlatform(end.x, end.y, 0.5);
-    commands.remove(0);
-    break;
-    
-  case "goto home":
-    movePlatform(0.5, 0, 0.5);
-    commands.remove(0);
-    break;
-    
-  case "wait for queue":
-    if (hektorQueueLength==0) {
-      commands.remove(0);
+  if (commands.size() > 0) {
+    String cmd = commands.get(0);
+    boolean finished = true;
+    if (cmd == "pen1 up") {
+    } else if (cmd == "pen2 up") {
+    } else if (cmd == "pen1 down") {
+    } else if (cmd == "pen2 down") {
+    } else if (cmd == "goto start") {
+      movePlatform(start.x, start.y, 0.5);
+    } else if (cmd == "goto end") {
+      movePlatform(end.x, end.y, 0.5);
+    } else if (cmd == "goto home") {
+      movePlatform(0.5, 0, 0.5);
+    } else if (cmd == "wait for queue") {
+      finished = (hektorQueueLength==0);
+    } else if (cmd == "circle") {
+      makeCircle();
     }
-    break;
-    
-  case "circle":
-    makeCircle();
-    break;
+
+    if (finished)  commands.remove(0);
   }
 }
 

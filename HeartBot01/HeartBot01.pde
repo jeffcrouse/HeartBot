@@ -44,18 +44,8 @@ int ButtonLast = 1;  // Button signal as of last pre() - used to determine chang
  ╩╚═└─┘└─┘└─┘ ┴   ╚═╝ ┴ └─┘└  └  
  *************************************/
 
-class PlatformCommand {
-  PlatformCommand(PVector location, float speed) {
-    this.location = location;
-    this.speed = speed;
-  }
-  PVector location;
-  float speed;
-}
-
-ArrayList<PlatformCommand> commands = new ArrayList<PlatformCommand>();
-
-
+ArrayList<String> commands = new ArrayList<String>();
+ArrayList<PVector> moves = new ArrayList<PVector>();
 
 // For you, Ranjit
 
@@ -84,8 +74,8 @@ String TINYG_INITIALIZERS[] = {
   "$2mi=8", 
 
   "G90", // absolute positioning mode
-  
-  "G61.1",  // smooth path mode
+
+  "G61.1", // smooth path mode
 
   "$qv=1"    // verbose queue reports
 };
@@ -172,17 +162,16 @@ void hektorJog(float dx, float dy) {
 // approximate movement by using raw motor commands, for when it's not calibrated yet
 void hektorJogRaw(float dx, float dy) {
   if (!useHektor) return;
-  
+
   float hx=0, hy=0;
   if (dx != 0) {
     hx = REVERSE * dx;
     hy = REVERSE * dx;
-  }
-  else if (dy != 0) {
+  } else if (dy != 0) {
     hx = REVERSE * -dy;
     hy = REVERSE * dy;
   }
-    
+
   tinyg.write("G91\n"); // relative coordinates
   tinyg.write("G0 X" + hx + " Y" + hy + "\n");
   tinyg.write("G90\n"); // back to absolute coords
@@ -260,31 +249,67 @@ void pre() {
     else onButtonUp();
     ButtonLast = Button;
   }
-
-  if (hektorQueueLength < 20 && commands.size() > 0) {
-    PlatformCommand c = commands.get(0);
-    movePlatform(c.location.x, c.location.y, c.speed);
-    commands.remove(0);
+  
+  if(hektorQueueLength < 19) {
+    movePlatform(moves.get(0).x, moves.get(0).y, 0.5);
+    moves.remove(0);
   }
-  if (drawingLine && hektorQueueLength==0) {
-    drawingLine = false;
 
-    float radius = random(0.01, 0.1);
-    PVector center = new PVector();
-    center.x = start.x + cos(radians(-45)) * (dist+radius);
-    center.y = start.y + sin(radians(-45)) * (dist+radius);
+  switch(commands.get(0)) {
+  case "pen1 up":
 
-    float inc = radians(360) / 40.0;
-    for (float angle = 0; angle < radians (360); angle+=inc) {
-      PVector p = new PVector();
-      p.x = center.x + cos(angle) * radius;
-      p.y = center.y + sin(angle) * radius;
-      commands.add( new PlatformCommand(p, 1.0) );
+    break;
+  case "pen2 up":
+
+    break;
+  case "pen1 down":
+
+    break;
+  case "pen2 down":
+    break;
+    
+  case "goto start":
+    movePlatform(start.x, start.y, 0.5);
+    commands.remove(0);
+    break;
+    
+  case "goto end":
+    movePlatform(end.x, end.y, 0.5);
+    commands.remove(0);
+    break;
+    
+  case "goto home":
+    movePlatform(0.5, 0, 0.5);
+    commands.remove(0);
+    break;
+    
+  case "wait for queue":
+    if (hektorQueueLength==0) {
+      commands.remove(0);
     }
+    break;
+    
+  case "circle":
+    makeCircle();
+    break;
   }
 }
 
+// ---------------------------------------------------------------
+void makeCircle() {
+  float radius = random(0.01, 0.1);
+  PVector center = new PVector();
+  center.x = start.x + cos(radians(-45)) * (dist+radius);
+  center.y = start.y + sin(radians(-45)) * (dist+radius);
 
+  float inc = radians(360) / 40.0;
+  for (float angle = 0; angle < radians (360); angle+=inc) {
+    PVector p = new PVector();
+    p.x = center.x + cos(angle) * radius;
+    p.y = center.y + sin(angle) * radius;
+    moves.add( p );
+  }
+}
 
 // ---------------------------------------------------------------
 void draw() {
@@ -346,32 +371,32 @@ void keyPressed() {
     break;
 
   case 'I':
-    hektorJogRaw(0,-1);
+    hektorJogRaw(0, -1);
     break;
   case 'J':
-    hektorJogRaw(-1,0);
+    hektorJogRaw(-1, 0);
     break;
   case 'K':
-    hektorJogRaw(0,1);
+    hektorJogRaw(0, 1);
     break;
   case 'L':
-    hektorJogRaw(1,0);
+    hektorJogRaw(1, 0);
     break;
 
   case 'i':
-    hektorJogRaw(0,-5);
+    hektorJogRaw(0, -5);
     break;
   case 'j':
-    hektorJogRaw(-5,0);
+    hektorJogRaw(-5, 0);
     break;
   case 'k':
-    hektorJogRaw(0,5);
+    hektorJogRaw(0, 5);
     break;
   case 'l':
-    hektorJogRaw(5,0);
+    hektorJogRaw(5, 0);
     break;
 
-  
+
   case 'H':
     hektorSetHome();
     break;
@@ -451,7 +476,6 @@ void penOneDown() {
 PVector start = new PVector();
 PVector end = new PVector();
 float dist;
-boolean drawingLine = false;
 
 void drawLine() {
 
@@ -465,9 +489,16 @@ void drawLine() {
   } 
   while (end.x > 0.8 || end.y < 0.2);
 
-  commands.add( new PlatformCommand(start, 0.5) );
-  commands.add( new PlatformCommand(end, 0.5) );
-  drawingLine = true;
+  commands.add( "pen1 up" );
+  commands.add( "pen2 up" );
+  commands.add( "goto start" );
+  commands.add( "wait for queue" );
+  commands.add( "pen1 down" );
+  commands.add( "goto end" );
+  commands.add( "wait for queue" );
+  commands.add( "circle" );
+  commands.add( "pen1 up");
+  commands.add( "goto home" );
 }
 
 

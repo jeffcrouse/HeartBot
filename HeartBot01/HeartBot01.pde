@@ -270,7 +270,7 @@ void pre() {
     float radius = random(0.01, 0.1);
     PVector center = new PVector();
     center.x = start.x + cos(radians(-45)) * (dist+radius);
-    center.y = start.y + cos(radians(-45)) * (dist+radius);
+    center.y = start.y + sin(radians(-45)) * (dist+radius);
 
     float inc = radians(360) / 40.0;
     for (float angle = 0; angle < radians (360); angle+=inc) {
@@ -331,7 +331,7 @@ void keyPressed() {
     cp5.saveProperties(props);
     break;
 
-  case 'l':
+  case 'n':
     drawLine();
     break;
 

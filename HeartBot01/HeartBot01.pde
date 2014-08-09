@@ -14,7 +14,8 @@ String props = "bot.properties";
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
 boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
-boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
+boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
+boolean useDualPen = true;
 
 Serial sPort;
 //String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
@@ -43,6 +44,44 @@ int ButtonLast = 1;  // Button signal as of last pre() - used to determine chang
  ╠╦╝│ │├┴┐│ │ │   ╚═╗ │ │ │├┤ ├┤ 
  ╩╚═└─┘└─┘└─┘ ┴   ╚═╝ ┴ └─┘└  └  
  *************************************/
+
+/*****
+   dualPen bot
+*/
+
+Serial dualPenPort;
+String DUALPEN_SERIAL_PORT = "/dev/tty.usbmodem26091";
+int DUALPEN_SERIAL_SPEED = 115200;
+
+void dualPenSetup() {
+  if (!useDualPen) {
+    println("WARNING - dualPen disabled");
+    return;
+  }
+  dualPenPort = new Serial(this, DUALPEN_SERIAL_PORT, DUALPEN_SERIAL_SPEED);
+}
+
+void dualPenWrite(String s) {
+  println("Sending to dualPen: " + s);
+  dualPenPort.write(s);
+  dualPenPort.write("\n");
+}
+
+// pen is 1 (left) or 2 (right); draw is boolean (true for pen to touch paper) 
+void dualPenSetPen(int pen, boolean draw) {
+  if (!useDualPen) return;
+  
+  
+  String s = "p" + pen + (draw ? "d" : "u");
+  dualPenWrite(s);
+}
+
+
+
+/*****
+   hektor bot
+*/
+
 
 class PlatformCommand {
   PlatformCommand(PVector location, float speed) {
@@ -119,7 +158,10 @@ float XY[] = {
 // call setup_robot at startup time to initialize motor drivers
 // IT TAKES ABOUT 20 SECONDS
 void hektorSetup() {
-  if (!useHektor) return;
+  if (!useHektor) {
+    println("WARNING - hektor is disabled at the top of the code!");
+    return;
+  }
 
   tinyg = new Serial(this, TINYG_SERIAL_PORT, TINYG_SERIAL_SPEED);
 
@@ -202,6 +244,7 @@ void hektorSerialEvent(String data) {
 // ---------------------------------------------------------------
 void setup() {
   hektorSetup(); // takes 20-30 seconds!
+  dualPenSetup();
 
   size(700, 600);  // Stage size
   frameRate(100);  
@@ -333,7 +376,7 @@ void keyPressed() {
     cp5.saveProperties(props);
     break;
 
-  case 'l':
+  case 'X': // WRONG
     drawLine();
     break;
 
@@ -371,6 +414,14 @@ void keyPressed() {
     hektorJogRaw(5,0);
     break;
 
+  case 'p':
+    dualPenSetPen(2, true);
+    break;
+  
+  case 'o':
+    dualPenSetPen(2, false);
+    break;
+    
   
   case 'H':
     hektorSetHome();

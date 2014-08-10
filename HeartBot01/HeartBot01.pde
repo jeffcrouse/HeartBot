@@ -14,7 +14,7 @@ String props = "bot.properties";
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
 boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
-boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
+boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
 boolean useDualPen = true;
 
 Serial sPort;
@@ -46,8 +46,8 @@ int ButtonLast = 1;  // Button signal as of last pre() - used to determine chang
  *************************************/
 
 /*****
-   dualPen bot
-*/
+ dualPen bot
+ */
 
 Serial dualPenPort;
 String DUALPEN_SERIAL_PORT = "/dev/tty.usbmodem26091";
@@ -70,8 +70,8 @@ void dualPenWrite(String s) {
 // pen is 1 (left) or 2 (right); draw is boolean (true for pen to touch paper) 
 void dualPenSetPen(int pen, boolean draw) {
   if (!useDualPen) return;
-  
-  
+
+
   String s = "p" + pen + (draw ? "d" : "u");
   dualPenWrite(s);
 }
@@ -79,8 +79,8 @@ void dualPenSetPen(int pen, boolean draw) {
 
 
 /*****
-   hektor bot
-*/
+ hektor bot
+ */
 
 
 ArrayList<String> commands = new ArrayList<String>();
@@ -115,7 +115,8 @@ String TINYG_INITIALIZERS[] = {
 
   "G90", // absolute positioning mode
 
-  "G61.1", // smooth path mode
+  //"G61.1", // exact path mode
+  "G61", // exact stop mode
 
   "$qv=1"    // verbose queue reports
 };
@@ -176,7 +177,7 @@ void hektorGotoXY(float X, float Y) {
   String gcode = "G01 X" + nf(M, 0, 2) + " Y" + nf(N, 0, 2) + " F" + FEED_RATE;
   tinyg.write(gcode);
   tinyg.write("\n");
-
+  hektorQueueLength = 100; // 100 means "queue out of date"
   //println("GO " + nf(X, 0, 2) + ", " + nf(Y, 0, 2) + " => " + gcode);
 }
 
@@ -226,7 +227,7 @@ void hektorSerialEvent(String data) {
   if (m != null) {
     int qr = Integer.parseInt(m[1]);
     hektorQueueLength = 28 - qr;
-    println("Hektor queue: " + hektorQueueLength);
+    //println("Hektor queue: " + hektorQueueLength);
   }
 }
 
@@ -294,13 +295,22 @@ void pre() {
     ButtonLast = Button;
   }
 
+
   if (hektorQueueLength < 19 && moves.size() > 0) {
-    movePlatform(moves.get(0).x, moves.get(0).y, 0.5);
+    float x = moves.get(0).x;
+    float y = moves.get(0).y;
+    //println("moving to "+x+" "+y);
+    movePlatform(x, y, 0.5);
     moves.remove(0);
   }
+
   if (commands.size() > 0) {
     String cmd = commands.get(0);
-    boolean finished = true;
+    boolean cmdFinished = true;
+    
+    if (cmd=="wait for queue") print('.');
+    else println(cmd);
+
     if (cmd == "pen1 up") {
       dualPenSetPen(1, false);
     } else if (cmd == "pen2 up") {
@@ -310,18 +320,18 @@ void pre() {
     } else if (cmd == "pen2 down") {
       dualPenSetPen(2, true);
     } else if (cmd == "goto start") {
-      movePlatform(start.x, start.y, 0.5);
+      moves.add( start );
     } else if (cmd == "goto end") {
-      movePlatform(end.x, end.y, 0.5);
+      moves.add( end );
     } else if (cmd == "goto home") {
-      movePlatform(0.5, 0, 0.5);
-    } else if (cmd == "wait for queue") {
-      finished = (hektorQueueLength==0);
+      moves.add( new PVector(0.5, 0) );
     } else if (cmd == "circle") {
       makeCircle();
+    } else if( cmd == "wait for queue") {
+      cmdFinished = (hektorQueueLength==0 && moves.size()==0);
     }
 
-    if (finished)  commands.remove(0);
+    if (cmdFinished)  commands.remove(0);
   }
 }
 
@@ -333,7 +343,7 @@ void makeCircle() {
   center.y = start.y + sin(radians(-45)) * (dist+radius);
 
   float inc = radians(360) / 40.0;
-  for (float angle = 0; angle < radians (360); angle+=inc) {
+  for (float angle = 0; angle < radians (360)+inc; angle+=inc) {
     PVector p = new PVector();
     p.x = center.x + cos(angle) * radius;
     p.y = center.y + sin(angle) * radius;
@@ -354,7 +364,8 @@ void draw() {
     "Signal = "+Sensor, 
     "Mean = "+Mean, 
     "StdDev = "+StdDev, 
-    "StdDevThreshCounter = "+StdDevThreshCounter
+    "StdDevThreshCounter = "+StdDevThreshCounter,
+    "hektorQueueLength = "+hektorQueueLength
   };
 
   for (int i=0; i<msg.length; i++) {
@@ -429,11 +440,11 @@ void keyPressed() {
   case 'p':
     dualPenSetPen(2, true);
     break;
-  
+
   case 'o':
     dualPenSetPen(2, false);
     break;
-    
+
   case 'H':
     hektorSetHome();
     break;
@@ -523,12 +534,14 @@ void drawLine() {
   commands.add( "pen2 up" );
   commands.add( "goto start" );
   commands.add( "wait for queue" );
-  commands.add( "pen1 down" );
+  commands.add( "pen2 down" );
   commands.add( "goto end" );
   commands.add( "wait for queue" );
   commands.add( "circle" );
-  commands.add( "pen1 up");
+  commands.add( "wait for queue" );
+  commands.add( "pen2 up");
   commands.add( "goto home" );
+  commands.add( "wait for queue" );
 }
 
 
@@ -537,7 +550,7 @@ void movePlatform(float x, float y, float speed) {
   float platformX = x * 72 + 24;
   float platformY = y * 72 + 24;
 
-  println("Hektor to "+x+", "+y + ", => " + platformX + ", " + platformY + " - enabled? " + useHektor);
+  //println("Hektor to "+x+", "+y + ", => " + platformX + ", " + platformY + " - enabled? " + useHektor);
   hektorGotoXY(platformX, platformY);
 }
 

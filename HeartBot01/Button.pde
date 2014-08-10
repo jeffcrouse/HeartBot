@@ -9,9 +9,9 @@
 //----------------------------------------------------
 void onButtonUp() {
   println("Button Up");
-  if (heartbeatPresent() && !drawingInProgress) {
-    startNewDrawing();
-  }
+//  if (heartbeatPresent() && !drawingInProgress) {
+//    startNewDrawing();
+//  }
 }
 
 //----------------------------------------------------

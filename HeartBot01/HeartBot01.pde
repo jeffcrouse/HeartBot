@@ -37,203 +37,10 @@ int StdDevThreshCounter = 0;  // If the standard deviation stays high for a whil
 int Button = 1;      // Current Button Signal (updated in serialEvent)
 int ButtonLast = 1;  // Button signal as of last pre() - used to determine change events
 
-
-
-/*************************************
- ╦═╗┌─┐┌┐ ┌─┐┌┬┐  ╔═╗┌┬┐┬ ┬┌─┐┌─┐
- ╠╦╝│ │├┴┐│ │ │   ╚═╗ │ │ │├┤ ├┤ 
- ╩╚═└─┘└─┘└─┘ ┴   ╚═╝ ┴ └─┘└  └  
- *************************************/
-
-/*****
- dualPen bot
- */
-
-Serial dualPenPort;
-String DUALPEN_SERIAL_PORT = "/dev/tty.usbmodem26091";
-int DUALPEN_SERIAL_SPEED = 115200;
-
-void dualPenSetup() {
-  if (!useDualPen) {
-    println("WARNING - dualPen disabled");
-    return;
-  }
-  dualPenPort = new Serial(this, DUALPEN_SERIAL_PORT, DUALPEN_SERIAL_SPEED);
-}
-
-void dualPenWrite(String s) {
-  println("Sending to dualPen: " + s);
-  dualPenPort.write(s);
-  dualPenPort.write("\n");
-}
-
-// pen is 1 (left) or 2 (right); draw is boolean (true for pen to touch paper) 
-void dualPenSetPen(int pen, boolean draw) {
-  if (!useDualPen) return;
-
-
-  String s = "p" + pen + (draw ? "d" : "u");
-  dualPenWrite(s);
-}
-
-
-
-/*****
- hektor bot
- */
-
+int lastHektorRequestQueueReport = 0;
 
 ArrayList<String> commands = new ArrayList<String>();
 ArrayList<PVector> moves = new ArrayList<PVector>();
-
-
-// For you, Ranjit
-
-boolean drawingInProgress = false;
-
-String TINYG_SERIAL_PORT = "/dev/tty.usbserial-DA00FRX3";
-int TINYG_SERIAL_SPEED = 115200;
-String TINYG_INITIALIZERS[] = {
-  //"$defa=1", // TOTAL RESET - DON'T DO THIS
-  "G20", // standard units (inches)
-  "$1sa=1.8", // 1.8 degrees per step = 200 steps per revolution
-  "$1tr=2.4", // 2.4 inches per revolution using the 30 tooth pulley
-  "$2sa=1.8", // same for motor 2
-  "$2tr=2.4", 
-  // Jerk max of 20 isn’t bad, maybe a bit too high
-  "$xjm=20", 
-  "$yjm=20", 
-  //Max feed rate 360 revs per minute?
-  "$xvm=360", 
-  "$xfr=360", 
-  "$yvm=360", 
-  "$yfr=360", 
-
-  // microstepping (1, 2, 4, or 8)
-  "$1mi=8", 
-  "$2mi=8", 
-
-  "G90", // absolute positioning mode
-
-  //"G61.1", // exact path mode
-  "G61", // exact stop mode
-
-  "$qv=1"    // verbose queue reports
-};
-
-int FEED_RATE = 360;
-
-float jog = 4; // inches
-
-//float HOME_BELT[] = {-58, 59}; // right, left belt lengths when homed (right belt has negative length)
-float HOME_BELT[] = {
-  58, -59
-}; // right, left belt lengths when homed (motors face canvas, left belt has negative length)
-int REVERSE = -1;
-
-float HOME_XY[] = {
-  58, 24
-};  // XY position (right, down from left motor) when homed
-
-float HEKTOR_WIDTH = 115.0;  // separation between left and right motors
-float CARRIAGE_WIDTH = 3.5; // separation between left and right supports on carriage
-
-Serial tinyg;
-
-int hektorQueueLength = 0;
-
-boolean hektor_homed = false;
-float XY[] = {
-  0, 0
-};
-
-// call setup_robot at startup time to initialize motor drivers
-// IT TAKES ABOUT 20 SECONDS
-void hektorSetup() {
-  if (!useHektor) {
-    println("WARNING - hektor is disabled at the top of the code!");
-    return;
-  }
-
-  tinyg = new Serial(this, TINYG_SERIAL_PORT, TINYG_SERIAL_SPEED);
-
-  for (int i=0; i<TINYG_INITIALIZERS.length; i++) {
-    tinyg.write(TINYG_INITIALIZERS[i]);
-    tinyg.write("\n");
-    println("Sending: " + TINYG_INITIALIZERS[i]);
-    delay(500);
-  }
-}
-
-void hektorGotoXY(float X, float Y) {
-  if (!useHektor) return;
-
-  if (!hektor_homed) {
-    println("NOT HOMED!");
-    return;
-  }
-  float N = REVERSE * (float)Math.sqrt( (X-CARRIAGE_WIDTH/2)*(X-CARRIAGE_WIDTH/2) + Y*Y );
-  float M = REVERSE * -1 * (float)Math.sqrt( (HEKTOR_WIDTH-X-CARRIAGE_WIDTH/2)*(HEKTOR_WIDTH-X-CARRIAGE_WIDTH/2) + Y*Y );
-  String gcode = "G01 X" + nf(M, 0, 2) + " Y" + nf(N, 0, 2) + " F" + FEED_RATE;
-  tinyg.write(gcode);
-  tinyg.write("\n");
-  hektorQueueLength = 100; // 100 means "queue out of date"
-  //println("GO " + nf(X, 0, 2) + ", " + nf(Y, 0, 2) + " => " + gcode);
-}
-
-void hektorSetHome() {
-  if (!useHektor) return;
-
-  XY[0] = HOME_XY[0];
-  XY[1] = HOME_XY[1];
-
-  tinyg.write("G92 X");
-  tinyg.write(nf(HOME_BELT[0], 0, 2));
-  tinyg.write(" Y");
-  tinyg.write(nf(HOME_BELT[1], 0, 2));
-  tinyg.write("\n");
-  hektor_homed = true;
-}
-
-void hektorJog(float dx, float dy) {
-  if (!useHektor) return;
-
-  XY[0] += dx * jog;
-  XY[1] += dy * jog;
-  hektorGotoXY(XY[0], XY[1]);
-}
-
-// approximate movement by using raw motor commands, for when it's not calibrated yet
-void hektorJogRaw(float dx, float dy) {
-  if (!useHektor) return;
-
-  float hx=0, hy=0;
-  if (dx != 0) {
-    hx = REVERSE * dx;
-    hy = REVERSE * dx;
-  } else if (dy != 0) {
-    hx = REVERSE * -dy;
-    hy = REVERSE * dy;
-  }
-
-  tinyg.write("G91\n"); // relative coordinates
-  tinyg.write("G0 X" + hx + " Y" + hy + "\n");
-  tinyg.write("G90\n"); // back to absolute coords
-}
-
-void hektorSerialEvent(String data) {
-  //println("Hektor serial event " + data);
-  String[] m = match(data, "qr:(\\d+)");
-  if (m != null) {
-    int qr = Integer.parseInt(m[1]);
-    hektorQueueLength = 28 - qr;
-    //println("Hektor queue: " + hektorQueueLength);
-  }
-}
-
-void hektorRequestQueueReport() {
-  tinyg.write("$QR\n");
-}
 
 
 
@@ -270,8 +77,6 @@ void setup() {
     sPort.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
     buttonLightOff();
   }
-
-  //resetPlatform();
 }
 
 
@@ -300,8 +105,15 @@ void pre() {
     ButtonLast = Button;
   }
 
-
-  if (hektorQueueLength < 19 && moves.size() > 0) {
+  // Request a RequestQueueReport every 2 seconds
+  if(millis()-lastHektorRequestQueueReport > 2000) {
+    hektorRequestQueueReport();
+    print("*");
+    lastHektorRequestQueueReport = millis();
+  }
+  
+  // If there is room in the Hektor queue, add some stuff from the moves ArrayList
+  if (hektorQueueLength < 20 && moves.size() > 0) {
     float x = moves.get(0).x;
     float y = moves.get(0).y;
     //println("moving to "+x+" "+y);
@@ -309,6 +121,7 @@ void pre() {
     moves.remove(0);
   }
 
+  // If there are any commands to process, process them.
   if (commands.size() > 0) {
     String cmd = commands.get(0);
     boolean cmdFinished = true;
@@ -343,34 +156,10 @@ void pre() {
 }
 
 // ---------------------------------------------------------------
-void prepCircle() {
-  circleRadius = random(0.01, 0.1);
-  circleCenter.x = end.x + cos(radians(-45)) * circleRadius;
-  circleCenter.y = end.y + sin(radians(-45)) * circleRadius;
-
-  PVector p = new PVector();
-  p.x = circleCenter.x + cos(0) * circleRadius;
-  p.y = circleCenter.y + sin(0) * circleRadius;
-  moves.add( p );
-}
-
-// ---------------------------------------------------------------
-void makeCircle() {
-  float inc = radians(360) / 40.0;
-  for (float angle = 0; angle < radians (360)+inc; angle+=inc) {
-    PVector p = new PVector();
-    p.x = circleCenter.x + cos(angle) * circleRadius;
-    p.y = circleCenter.y + sin(angle) * circleRadius;
-    moves.add( p );
-  }
-}
-
-// ---------------------------------------------------------------
 void draw() {
   background(51);
   fill(#FFFFFF);
   noStroke();
-
 
   String msg[] = {
     "FrameRate = "+int(frameRate), 
@@ -414,7 +203,7 @@ void keyPressed() {
   switch(key) {
   case 'q':
     hektorRequestQueueReport();
-      break;
+    break;
 
   case 's':
     println("Saving Properties to "+props);
@@ -520,20 +309,11 @@ void serialEvent(Serial port) {
 
 
 
-/**********************************
- ╔═╗┌─┐┌┐┌  ╔═╗┌─┐┌┬┐┌┬┐┌─┐┌┐┌┌┬┐┌─┐
- ╠═╝├┤ │││  ║  │ │││││││├─┤│││ ││└─┐
- ╩  └─┘┘└┘  ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
- **********************************/
-
-
-
-
-/**************************************************
- ╔═╗┬  ┌─┐┌┬┐┌─┐┌─┐┬─┐┌┬┐  ╔═╗┌─┐┌┬┐┌┬┐┌─┐┌┐┌┌┬┐┌─┐
- ╠═╝│  ├─┤ │ ├┤ │ │├┬┘│││  ║  │ │││││││├─┤│││ ││└─┐
- ╩  ┴─┘┴ ┴ ┴ └  └─┘┴└─┴ ┴  ╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
- **************************************************/
+/*************************************
+ ╔╦╗┌─┐┌┬┐┌─┐╔═╗┌─┐┌┬┐┌┬┐┌─┐┌┐┌┌┬┐┌─┐
+ ║║║├┤  │ ├─┤║  │ │││││││├─┤│││ ││└─┐
+ ╩ ╩└─┘ ┴ ┴ ┴╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
+ *************************************/
 
 
 PVector start = new PVector();
@@ -578,6 +358,30 @@ void drawLine() {
 }
 
 
+// ---------------------------------------------------------------
+void prepCircle() {
+  circleRadius = random(0.01, 0.1);
+  circleCenter.x = end.x + cos(radians(-45)) * circleRadius;
+  circleCenter.y = end.y + sin(radians(-45)) * circleRadius;
+
+  PVector p = new PVector();
+  p.x = circleCenter.x + cos(0) * circleRadius;
+  p.y = circleCenter.y + sin(0) * circleRadius;
+  moves.add( p );
+}
+
+// ---------------------------------------------------------------
+void makeCircle() {
+  float inc = radians(360) / 40.0;
+  for (float angle = 0; angle < radians (360)+inc; angle+=inc) {
+    PVector p = new PVector();
+    p.x = circleCenter.x + cos(angle) * circleRadius;
+    p.y = circleCenter.y + sin(angle) * circleRadius;
+    moves.add( p );
+  }
+}
+
+// ---------------------------------------------------------------
 // x, y in range 0.0 to 1.0
 void movePlatform(float x, float y, float speed) {
   float platformX = x * 72 + 24;
@@ -587,19 +391,8 @@ void movePlatform(float x, float y, float speed) {
   hektorGotoXY(platformX, platformY);
 }
 
+// ---------------------------------------------------------------
 void movePlatform(float x, float y) {
   movePlatform(x, y, 0.5);
 }
 
-
-
-
-void startNewDrawing() {
-  drawingInProgress = true;
-}
-
-/*
-void resetPlatform() {
- movePlatform(0.5, 1);
- }
- */

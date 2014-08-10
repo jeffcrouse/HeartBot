@@ -123,7 +123,8 @@ void serialLine(String s) {
     parseGo(2, s);
   }
   
-  // pen twitch 45 degrees (from -1 bottom right to +1 top left)
+  // pen twitch 45 degrees left of vertical (from -1 bottom right to +1 top left)
+  // optional second argument is angle (in radians) - default  3/4 * PI
   else if (s.indexOf("p1t")==0) {
     parseTwitch(1, s);
   }
@@ -198,13 +199,24 @@ void parseGoRaw(int pen, String s) {
 
 void parseTwitch(int pen, String s) {
   String ts = getNthToken(s, ' ', 1);
+  String as = getNthToken(s, ' ', 2); // optional angle argument 0 to PI
   if (ts != "") {
     float t = parseFloat(ts);
     if (t < -1.0 || t > 1.0) return;
-    //Serial.println(t);
     
-    float x = 0.5 + 0.4*t;
-    float y = 0.5 - 0.4*t;
+    float a = 3*PI/4.0;
+    if (as != "") {
+      a = parseFloat(as);
+    }
+    
+    Serial.print("twitch ");
+    Serial.print(t);
+    Serial.print(" angle ");
+    Serial.print(a * 360.0 / TWO_PI);
+    Serial.println();
+    
+    float x = 0.5 + 0.4*t*cos(a);
+    float y = 0.5 + 0.4*t*sin(a);
     
     goNormalized(pen, x, y);
   }

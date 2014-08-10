@@ -15,7 +15,7 @@ String props = "bot.properties";
  *********************************/
 boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
 boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
-boolean useDualPen = true;
+boolean useDualPen = false;
 
 Serial sPort;
 //String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
@@ -231,6 +231,11 @@ void hektorSerialEvent(String data) {
   }
 }
 
+void hektorRequestQueueReport() {
+  tinyg.write("$QR\n");
+}
+
+
 
 // ---------------------------------------------------------------
 void setup() {
@@ -307,8 +312,8 @@ void pre() {
   if (commands.size() > 0) {
     String cmd = commands.get(0);
     boolean cmdFinished = true;
-    
-    if (cmd=="wait for queue") print('.');
+
+    if (cmd=="wait for queue" || cmd=="null") print('.');
     else println(cmd);
 
     if (cmd == "pen1 up") {
@@ -325,9 +330,11 @@ void pre() {
       moves.add( end );
     } else if (cmd == "goto home") {
       moves.add( new PVector(0.5, 0) );
+    } else if ( cmd == "prep circle" ) {
+      prepCircle();
     } else if (cmd == "circle") {
       makeCircle();
-    } else if( cmd == "wait for queue") {
+    } else if ( cmd == "wait for queue") {
       cmdFinished = (hektorQueueLength==0 && moves.size()==0);
     }
 
@@ -336,17 +343,24 @@ void pre() {
 }
 
 // ---------------------------------------------------------------
-void makeCircle() {
-  float radius = random(0.01, 0.1);
-  PVector center = new PVector();
-  center.x = start.x + cos(radians(-45)) * (dist+radius);
-  center.y = start.y + sin(radians(-45)) * (dist+radius);
+void prepCircle() {
+  circleRadius = random(0.01, 0.1);
+  circleCenter.x = end.x + cos(radians(-45)) * circleRadius;
+  circleCenter.y = end.y + sin(radians(-45)) * circleRadius;
 
+  PVector p = new PVector();
+  p.x = circleCenter.x + cos(0) * circleRadius;
+  p.y = circleCenter.y + sin(0) * circleRadius;
+  moves.add( p );
+}
+
+// ---------------------------------------------------------------
+void makeCircle() {
   float inc = radians(360) / 40.0;
   for (float angle = 0; angle < radians (360)+inc; angle+=inc) {
     PVector p = new PVector();
-    p.x = center.x + cos(angle) * radius;
-    p.y = center.y + sin(angle) * radius;
+    p.x = circleCenter.x + cos(angle) * circleRadius;
+    p.y = circleCenter.y + sin(angle) * circleRadius;
     moves.add( p );
   }
 }
@@ -357,6 +371,7 @@ void draw() {
   fill(#FFFFFF);
   noStroke();
 
+
   String msg[] = {
     "FrameRate = "+int(frameRate), 
     "BPM = "+BPM, 
@@ -364,13 +379,16 @@ void draw() {
     "Signal = "+Sensor, 
     "Mean = "+Mean, 
     "StdDev = "+StdDev, 
-    "StdDevThreshCounter = "+StdDevThreshCounter,
-    "hektorQueueLength = "+hektorQueueLength
-  };
+    "StdDevThreshCounter = "+StdDevThreshCounter, 
+    "hektorQueueLength = "+hektorQueueLength, 
+    "commands.size() = "+commands.size(), 
+    "moves.size() = " + moves.size(), 
+    "current command = " + (commands.size()>0 ? commands.get(0) : "")
+    };
 
-  for (int i=0; i<msg.length; i++) {
-    text(msg[i], 10, 200+(i*20));
-  }
+    for (int i=0; i<msg.length; i++) {
+      text(msg[i], 10, 200+(i*20));
+    }
 
   drawSignal();
   drawHeart(width-30, 10);
@@ -394,6 +412,10 @@ void mouseReleased() {
 void keyPressed() {
 
   switch(key) {
+  case 'q':
+    hektorRequestQueueReport();
+      break;
+
   case 's':
     println("Saving Properties to "+props);
     cp5.saveProperties(props);
@@ -517,6 +539,8 @@ void serialEvent(Serial port) {
 PVector start = new PVector();
 PVector end = new PVector();
 float dist;
+float circleRadius;
+PVector circleCenter = new PVector();
 
 void drawLine() {
 
@@ -535,8 +559,17 @@ void drawLine() {
   commands.add( "goto start" );
   commands.add( "wait for queue" );
   commands.add( "pen2 down" );
+  for (int i=0; i<200; i++) {
+    commands.add("null");
+  }
   commands.add( "goto end" );
   commands.add( "wait for queue" );
+  commands.add( "pen2 up" );
+
+  commands.add( "prep circle" );
+  commands.add( "wait for queue" );
+
+  commands.add( "pen2 down" );
   commands.add( "circle" );
   commands.add( "wait for queue" );
   commands.add( "pen2 up");
@@ -557,6 +590,9 @@ void movePlatform(float x, float y, float speed) {
 void movePlatform(float x, float y) {
   movePlatform(x, y, 0.5);
 }
+
+
+
 
 void startNewDrawing() {
   drawingInProgress = true;

@@ -50,7 +50,6 @@ void mySun() {
   commands.add( "goto east" );
   commands.add( "wait for queue" );
 
-
   commands.add( "pen1 up" );
   commands.add( "pen2 up" );
   commands.add( "goto start" );

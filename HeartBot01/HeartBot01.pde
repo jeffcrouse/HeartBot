@@ -4,7 +4,7 @@ import controlP5.*;
 PFont font;
 ControlP5 cp5;
 String props = "bot.properties";
-
+boolean drawingInProgress = false;
 
 
 
@@ -42,7 +42,6 @@ void setup() {
             .setNumberOfTickMarks(7)
               .setValue(200);
 
-
   cp5.loadProperties(props);
 
   println(Serial.list());
@@ -75,10 +74,12 @@ void pre() {
   crunchSensorData();
 
   if (doTwitch) {
-    float amt = map(Sensor, 212, 1024, -0.5, 0.5);
-    float angle = map(moves.size(), 40, 0, 0, PI*2);
+    float amt = map(Sensor, 212, 1024, -1, 1);
+    amt *= map(moves.size(), 0, 100, 1, 0.1);
     
-    println(degrees(angle));
+    //float angle = map(moves.size(), 40, 0, 0, PI*2);
+    
+    float angle = radians(starburstAngle);
     dualPenTwitch(1, amt, angle);
   }
 
@@ -133,7 +134,6 @@ void pre() {
     } else if (cmd == "goto start") {
       moves.add( start );
     } else if (cmd == "goto end") {
-      speed = map(dist, 0.4, 1, 0.1, 0.2);
       moves.add( end );
     } else if (cmd == "goto home") {
       moves.add( new PVector(0.5, 0) );
@@ -144,7 +144,9 @@ void pre() {
     } else if ( cmd == "wait for queue") {
       cmdFinished = (hektorQueueLength==0 && moves.size()==0);
     } else if ( cmd == "start drawing") {
+      drawingInProgress = true;
     } else if ( cmd == "end drawing") {
+      drawingInProgress = false;
     } else if ( cmd == "start twitch") {
       doTwitch = true;
     } else if ( cmd == "stop twitch") {
@@ -152,7 +154,7 @@ void pre() {
     } else if ( cmd == "pen1 home") {
       dualPenHome(1);
     } else if ( cmd == "pen2 home") {
-      dualPenHome(1);
+      dualPenHome(2);
     } else if ( cmd == "fishbone set radius") {
       fishboneSetRadius();
     } else if ( cmd == "full speed") {
@@ -167,12 +169,24 @@ void pre() {
       moves.add(east);
     } else if ( cmd == "goto west" ) {
       moves.add(west);
-    } else if( cmd == "make triangle" ) {
+    } else if ( cmd == "make triangle" ) {
       makeTriangle();
-    } else if( cmd == "triangle speed" ) {
-       triangleSetSpeed();
-    } else if( cmd == "prep triangle") {
+    } else if ( cmd == "triangles speed" ) {
+      triangleSetSpeed();
+    } else if ( cmd == "triangles prep") {
       trianglePrep();
+    } else if ( cmd == "circles update") {
+      circlesUpdate();
+    } else if ( cmd == "circles prep") {
+      circlesPrep();
+    } else if ( cmd == "starburst speed") {
+      starburstSpeed();
+    } else if ( cmd == "starburst draw line") {
+      starburstDrawLine();
+    } else if ( cmd == "goto center") {
+      moves.add( new PVector(0.5, 0.5) );
+    } else if ( cmd ==  "starburst increment" ) {
+      starburstIncrement();
     } else {
       println("WARNING: unknown command"+cmd);
     }
@@ -189,6 +203,7 @@ void draw() {
 
   String msg[] = {
     "FrameRate = "+int(frameRate), 
+    "drawingInProgress = " + (drawingInProgress ? "YES" : "NO"), 
     "BPM = "+BPM, 
     "IBI = "+IBI, 
     "Signal = "+Sensor, 
@@ -198,12 +213,13 @@ void draw() {
     "hektorQueueLength = "+hektorQueueLength, 
     "commands.size() = "+commands.size(), 
     "moves.size() = " + moves.size(), 
-    "current command = " + (commands.size()>0 ? commands.get(0) : "")
-    };
+    "current command = " + (commands.size()>0 ? commands.get(0) : ""), 
+    "starburstAngle = " + starburstAngle
+  };
 
-    for (int i=0; i<msg.length; i++) {
-      text(msg[i], 10, 200+(i*20));
-    }
+  for (int i=0; i<msg.length; i++) {
+    text(msg[i], 10, 200+(i*20));
+  }
 
   drawSignal();
   drawHeart(width-30, 10);
@@ -238,8 +254,10 @@ void keyPressed() {
 
   case 'n':
     //fishbone();
-    mySun();
+    //mySun();
     //triangles();
+    //circles();
+    starburst();
     break;
 
   case '0':
@@ -331,7 +349,6 @@ void keyPressed() {
 
 //----------------------------------------------------
 void serialEvent(Serial port) {
-
   try {
     String inData = port.readStringUntil('\n');
     if (inData==null) return;

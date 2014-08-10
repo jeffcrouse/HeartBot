@@ -31,8 +31,8 @@ String TINYG_INITIALIZERS[] = {
   "G90", // absolute positioning mode
   
   "G64", // continuous path mode
-  "$kjd=.2",  // it's okay to decelerate even if it means that you will miss your path by .2 inches.
-  "$yjd=.2", // it's okay to decelerate even if it means that you will miss your path by .2 inches.
+  "$kjd=1.0",  // it's okay to decelerate even if it means that you will miss your path by .2 inches.
+  "$yjd=1.0", // it's okay to decelerate even if it means that you will miss your path by .2 inches.
   
   //"G61.1", // exact path mode
   "G61", // exact stop mode

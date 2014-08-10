@@ -33,14 +33,14 @@ void triangles() {
   commands.add( "pen1 home" );
   commands.add( "pen2 home" );
 
-  commands.add( "prep triangle" );
+  commands.add( "triangles prep" );
   commands.add( "wait for queue" );
 
   commands.add( "pen1 down" );
   commands.add( "pen2 down" );
   commands.add( "start twitch" );
 
-  commands.add( "triangle speed");
+  commands.add( "triangles speed");
   commands.add( "make triangle" );
   commands.add( "wait for queue" );
 

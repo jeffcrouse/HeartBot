@@ -31,3 +31,20 @@ void dualPenSetPen(int pen, boolean draw) {
   dualPenWrite(s);
 }
 
+// send pen 1 or 2 to its home to be out of the way of the other (top left, top right)
+void dualPenHome(int pen) {
+  if (pen==1) {
+    dualPenWrite("p1g 0 0");
+  } else if (pen==2) {
+    dualPenWrite("p2g 1 0");
+  }
+}
+
+// twitch pen 1 or 2 at a roughly -45 degree angle (\) - send values -1 to 1
+void dualPenTwitch(int pen, float twitch) {
+  if (twitch < -1.0 || twitch > 1.0) return;
+  String s = "p" + pen + "t " + twitch;
+  dualPenWrite("s");  
+}
+
+

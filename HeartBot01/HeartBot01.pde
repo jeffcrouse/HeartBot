@@ -76,7 +76,9 @@ void pre() {
 
   if (doTwitch) {
     float amt = map(Sensor, 212, 1024, -0.5, 0.5);
-    float angle = map(moves.size(), 0, 40, 0, PI*2);
+    float angle = map(moves.size(), 40, 0, 0, PI*2);
+    
+    println(degrees(angle));
     dualPenTwitch(1, amt, angle);
   }
 
@@ -156,7 +158,7 @@ void pre() {
     } else if ( cmd == "full speed") {
       speed = 1.0;
     } else if ( cmd == "sun speed" ) {
-      speed = 0.2;
+      setSunSpeed();
     } else if ( cmd == "goto north" ) {
       moves.add(north);
     } else if ( cmd == "goto south" ) {
@@ -165,6 +167,12 @@ void pre() {
       moves.add(east);
     } else if ( cmd == "goto west" ) {
       moves.add(west);
+    } else if( cmd == "make triangle" ) {
+      makeTriangle();
+    } else if( cmd == "triangle speed" ) {
+       triangleSetSpeed();
+    } else if( cmd == "prep triangle") {
+      trianglePrep();
     } else {
       println("WARNING: unknown command"+cmd);
     }
@@ -231,6 +239,7 @@ void keyPressed() {
   case 'n':
     //fishbone();
     mySun();
+    //triangles();
     break;
 
   case '0':

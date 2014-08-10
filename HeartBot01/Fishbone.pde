@@ -1,4 +1,10 @@
 
+/*********************
+╔═╗┬┌─┐┬ ┬┌┐ ┌─┐┌┐┌┌─┐
+╠╣ │└─┐├─┤├┴┐│ ││││├┤ 
+╚  ┴└─┘┴ ┴└─┘└─┘┘└┘└─┘
+*********************/
+
 void fishbone() {
 
   do {
@@ -52,7 +58,7 @@ void fishbone() {
 
 // ---------------------------------------------------------------
 void fishboneSetRadius() {
-   circleRadius = random(0.01, 0.1);
+  circleRadius = random(0.01, 0.1);
 }
 
 // ---------------------------------------------------------------
@@ -65,3 +71,4 @@ void fishbonePrepCircle() {
   p.y = circleCenter.y + sin(0) * circleRadius;
   moves.add( p );
 }
+

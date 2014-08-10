@@ -209,14 +209,22 @@ void parseTwitch(int pen, String s) {
       a = parseFloat(as);
     }
     
+
+    
+    float x = 0.5 + 0.4*t*cos(a);
+    float y = 0.5 + 0.4*t*sin(a);
+    
+    /*
     Serial.print("twitch ");
     Serial.print(t);
     Serial.print(" angle ");
     Serial.print(a * 360.0 / TWO_PI);
+    Serial.print(" > ");
+    Serial.print(x);
+    Serial.print(" ");
+    Serial.print(y);
     Serial.println();
-    
-    float x = 0.5 + 0.4*t*cos(a);
-    float y = 0.5 + 0.4*t*sin(a);
+    */
     
     goNormalized(pen, x, y);
   }
@@ -306,7 +314,7 @@ void goNormalized(int pen, float x, float y) {
     float localX = 30, localY = 30; 
      if (pen==1) {
        localX = 15.0 + y*36.0;
-       localY = 10.0 + y*40.0;
+       localY = 10.0 + x*40.0;
        set_XY_1(localX, localY);
      }
      else if (pen==2) {

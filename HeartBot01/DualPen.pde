@@ -18,6 +18,8 @@ void dualPenSetup() {
 
 void dualPenWrite(String s) {
   //println("Sending to dualPen: " + s);
+  if (!useDualPen) return;
+  
   dualPenPort.write(s);
   dualPenPort.write("\n");
 }

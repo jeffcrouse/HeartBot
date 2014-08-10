@@ -36,6 +36,8 @@ String TINYG_INITIALIZERS[] = {
   
   //"G61.1", // exact path mode
   "G61", // exact stop mode
+  
+  "$mt=300", // wait 5 minutes idle before unpowering motors
 
   "$qv=1"    // verbose queue reports
 };
@@ -159,3 +161,6 @@ void hektorRequestQueueReport() {
   tinyg.write("$QR\n");
 }
 
+void hektorMotorsOff() {
+  tinyg.write("$md\n");
+}

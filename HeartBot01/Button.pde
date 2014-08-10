@@ -22,7 +22,7 @@ void onButtonDown() {
 //----------------------------------------------------
 void buttonLightOn() {
   if (!useSensor) return;
-  println("1");
+  //println("1");
   sPort.write("1");
   sPort.write("\n");
 }
@@ -30,7 +30,7 @@ void buttonLightOn() {
 //----------------------------------------------------
 void buttonLightOff() {
   if (!useSensor) return;
-  println("0");
+  //println("0");
   sPort.write("0");
   sPort.write("\n");
 }

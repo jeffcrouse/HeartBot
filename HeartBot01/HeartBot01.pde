@@ -13,34 +13,10 @@ String props = "bot.properties";
  ╚═╗├┤ │││└─┐│ │├┬┘  ╚═╗ │ │ │├┤ ├┤ 
  ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
  *********************************/
-boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
+boolean useSensor = true;      // ATTENTION!!!   Set this to false to disable the sensor altogether
 boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
-boolean useDualPen = false;
+boolean useDualPen = true;
 
-Serial sPort;
-//String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
-String sPortName = "/dev/tty.usbmodem1411";
-
-int Sensor;      // HOLDS PULSE SENSOR DATA FROM ARDUINO
-int IBI;         // HOLDS TIME BETWEN HEARTBEATS FROM ARDUINO
-int BPM;         // HOLDS HEART RATE VALUE FROM ARDUINO
-boolean beat = false;    // set when a heart beat is detected, then cleared when the BPM graph is advanced
-int beatCounter = 0;    // Bump this up to some number when the sensor reports a heartbeat, then decrement 
-
-int BufferSize = 200;  // How much "raw" sensor rata will we keep around for calculation?
-ArrayList<Integer> Signal = new ArrayList<Integer>();
-float Mean;              // The average of all of the samples in the Signal ArrayList
-float StdDev;            // The standard deviation of the "raw" sensor data
-int StdDevThresh = 200;  // A standard deviation above 200 means that there is some kind of activity.
-int StdDevThreshCounter = 0;  // If the standard deviation stays high for a while, we probably have a heartbeat
-
-int Button = 1;      // Current Button Signal (updated in serialEvent)
-int ButtonLast = 1;  // Button signal as of last pre() - used to determine change events
-
-int lastHektorRequestQueueReport = 0;
-
-ArrayList<String> commands = new ArrayList<String>();
-ArrayList<PVector> moves = new ArrayList<PVector>();
 
 
 
@@ -77,14 +53,22 @@ void setup() {
     sPort.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
     buttonLightOff();
   }
+
+  dualPenHome(1);
+  dualPenHome(2);
 }
 
 
 // ---------------------------------------------------------------
+int lastHektorRequestQueueReport = 0;
 void pre() {
 
   // Calculate mean, standard deviation, etc
   crunchSensorData();
+
+  if (doTwitch) {
+    dualPenTwitch(2, map(Sensor, 212, 1024, -1, 1));
+  }
 
   // If we have gotten a heartbeat from the sensor, do some stuff.
   if (beat) {
@@ -106,12 +90,12 @@ void pre() {
   }
 
   // Request a RequestQueueReport every 2 seconds
-  if(millis()-lastHektorRequestQueueReport > 2000) {
+  if (millis()-lastHektorRequestQueueReport > 2000) {
     hektorRequestQueueReport();
     print("*");
     lastHektorRequestQueueReport = millis();
   }
-  
+
   // If there is room in the Hektor queue, add some stuff from the moves ArrayList
   if (hektorQueueLength < 20 && moves.size() > 0) {
     float x = moves.get(0).x;
@@ -149,6 +133,16 @@ void pre() {
       makeCircle();
     } else if ( cmd == "wait for queue") {
       cmdFinished = (hektorQueueLength==0 && moves.size()==0);
+    } else if ( cmd == "start drawing") {
+    } else if ( cmd == "end drawing") {
+    } else if ( cmd == "start twitch") {
+      doTwitch = true;
+    } else if ( cmd == "stop twitch") {
+      doTwitch = false;
+    } else if ( cmd == "pen1 home") {
+      dualPenHome(1);
+    } else if ( cmd == "pen2 home") {
+      dualPenHome(1);
     }
 
     if (cmdFinished)  commands.remove(0);
@@ -260,6 +254,22 @@ void keyPressed() {
     hektorSetHome();
     break;
 
+  case 'g':
+    dualPenHome(1);
+    dualPenHome(2);
+    break;
+
+  case '+':
+    dualPenSetPen(1, true);
+    dualPenSetPen(2, true);
+    break;
+
+  case '-':
+    dualPenSetPen(1, false);
+    dualPenSetPen(2, false);
+    break;
+
+
   default:
     break;
   }
@@ -315,12 +325,16 @@ void serialEvent(Serial port) {
  ╩ ╩└─┘ ┴ ┴ ┴╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
  *************************************/
 
+ArrayList<String> commands = new ArrayList<String>(); // meta-command strings
+ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands (because the tinyg can only hold 20, this holds the rest)
+
 
 PVector start = new PVector();
 PVector end = new PVector();
 float dist;
 float circleRadius;
 PVector circleCenter = new PVector();
+boolean doTwitch = false;
 
 void drawLine() {
 
@@ -334,27 +348,41 @@ void drawLine() {
   } 
   while (end.x > 0.8 || end.y < 0.2);
 
+  commands.add( "start drawing" );
+
   commands.add( "pen1 up" );
   commands.add( "pen2 up" );
+  commands.add( "pen1 home" );
+  commands.add( "pen2 home" );
   commands.add( "goto start" );
   commands.add( "wait for queue" );
+  commands.add( "pen1 down" );
   commands.add( "pen2 down" );
+
   for (int i=0; i<200; i++) {
     commands.add("null");
   }
+  commands.add( "start twitch" );
   commands.add( "goto end" );
   commands.add( "wait for queue" );
+
+  commands.add( "pen1 up" );
   commands.add( "pen2 up" );
+  commands.add( "pen1 home" );
+  commands.add( "pen2 home" );
+  commands.add( "stop twitch" );
 
   commands.add( "prep circle" );
   commands.add( "wait for queue" );
+  commands.add( "pen1 down" );
 
-  commands.add( "pen2 down" );
   commands.add( "circle" );
   commands.add( "wait for queue" );
-  commands.add( "pen2 up");
+
+  commands.add( "pen1 up");
   commands.add( "goto home" );
   commands.add( "wait for queue" );
+  commands.add( "end drawing" );
 }
 
 

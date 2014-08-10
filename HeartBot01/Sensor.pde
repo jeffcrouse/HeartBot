@@ -6,6 +6,29 @@
  *********************************/
 
 
+Serial sPort;
+//String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
+String sPortName = "/dev/tty.usbmodem14111";
+
+int Sensor;      // HOLDS PULSE SENSOR DATA FROM ARDUINO
+int IBI;         // HOLDS TIME BETWEN HEARTBEATS FROM ARDUINO
+int BPM;         // HOLDS HEART RATE VALUE FROM ARDUINO
+boolean beat = false;    // set when a heart beat is detected, then cleared when the BPM graph is advanced
+int beatCounter = 0;    // Bump this up to some number when the sensor reports a heartbeat, then decrement 
+
+int BufferSize = 200;  // How much "raw" sensor rata will we keep around for calculation?
+ArrayList<Integer> Signal = new ArrayList<Integer>();
+float Mean;              // The average of all of the samples in the Signal ArrayList
+float StdDev;            // The standard deviation of the "raw" sensor data
+int StdDevThresh = 200;  // A standard deviation above 200 means that there is some kind of activity.
+int StdDevThreshCounter = 0;  // If the standard deviation stays high for a while, we probably have a heartbeat
+
+int Button = 1;      // Current Button Signal (updated in serialEvent)
+int ButtonLast = 1;  // Button signal as of last pre() - used to determine change events
+
+
+
+
 //----------------------------------------------------
 void sensorSerialEvent(String inData) {
   if (inData.charAt(0) == 'S') {          // leading 'S' for sensor data

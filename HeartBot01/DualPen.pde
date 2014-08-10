@@ -26,7 +26,6 @@ void dualPenWrite(String s) {
 void dualPenSetPen(int pen, boolean draw) {
   if (!useDualPen) return;
 
-
   String s = "p" + pen + (draw ? "d" : "u");
   dualPenWrite(s);
 }
@@ -34,7 +33,7 @@ void dualPenSetPen(int pen, boolean draw) {
 // send pen 1 or 2 to its home to be out of the way of the other (top left, top right)
 void dualPenHome(int pen) {
   if (pen==1) {
-    dualPenWrite("p1g 0 0");
+    dualPenWrite("p1g 0 1");
   } else if (pen==2) {
     dualPenWrite("p2g 1 0");
   }
@@ -44,7 +43,7 @@ void dualPenHome(int pen) {
 void dualPenTwitch(int pen, float twitch) {
   if (twitch < -1.0 || twitch > 1.0) return;
   String s = "p" + pen + "t " + twitch;
-  dualPenWrite("s");  
+  dualPenWrite(s);  
 }
 
 

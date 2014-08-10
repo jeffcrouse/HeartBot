@@ -259,6 +259,7 @@ void keyPressed() {
     dualPenHome(2);
     break;
 
+
   case '+':
     dualPenSetPen(1, true);
     dualPenSetPen(2, true);

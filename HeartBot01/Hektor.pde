@@ -30,6 +30,8 @@ String TINYG_INITIALIZERS[] = {
   "$2mi=8", 
 
   "G90", // absolute positioning mode
+  
+  "G64", // continuous path mode
 
   //"G61.1", // exact path mode
   "G61", // exact stop mode

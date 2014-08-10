@@ -81,11 +81,16 @@ void hektorSetup() {
     tinyg.write(TINYG_INITIALIZERS[i]);
     tinyg.write("\n");
     println("Sending: " + TINYG_INITIALIZERS[i]);
-    delay(500);
+    delay(150);
   }
 }
 
+
+// speed is fraction of maximum speed - 0.0 to 1.0
 void hektorGotoXY(float X, float Y) {
+  hektorGotoXY(X, Y, 1.0);
+}
+void hektorGotoXY(float X, float Y, float speed) {
   if (!useHektor) return;
 
   if (!hektor_homed) {
@@ -94,7 +99,7 @@ void hektorGotoXY(float X, float Y) {
   }
   float N = REVERSE * (float)Math.sqrt( (X-CARRIAGE_WIDTH/2)*(X-CARRIAGE_WIDTH/2) + Y*Y );
   float M = REVERSE * -1 * (float)Math.sqrt( (HEKTOR_WIDTH-X-CARRIAGE_WIDTH/2)*(HEKTOR_WIDTH-X-CARRIAGE_WIDTH/2) + Y*Y );
-  String gcode = "G01 X" + nf(M, 0, 2) + " Y" + nf(N, 0, 2) + " F" + FEED_RATE;
+  String gcode = "G01 X" + nf(M, 0, 2) + " Y" + nf(N, 0, 2) + " F" + nf(FEED_RATE*speed, 0, 2);
   tinyg.write(gcode);
   tinyg.write("\n");
   hektorQueueLength = 100; // 100 means "queue out of date"

@@ -59,6 +59,14 @@ void setup() {
 }
 
 
+void onBeatUp() {
+  if (heartbeatPresent()) buttonLightOn();
+}
+
+void onBeatDown() {
+  buttonLightOff();
+}
+
 // ---------------------------------------------------------------
 int lastHektorRequestQueueReport = 0;
 void pre() {
@@ -67,19 +75,21 @@ void pre() {
   crunchSensorData();
 
   if (doTwitch) {
-    dualPenTwitch(2, map(Sensor, 212, 1024, -1, 1));
+    float amt = map(Sensor, 212, 1024, -0.5, 0.5);
+    float angle = map(moves.size(), 0, 40, 0, PI*2);
+    dualPenTwitch(1, amt, angle);
   }
 
   // If we have gotten a heartbeat from the sensor, do some stuff.
   if (beat) {
     beatCounter = 20;
-    if (heartbeatPresent()) buttonLightOn();
+    onBeatUp();
     beat = false;
   }
 
   beatCounter--;
   if (beatCounter == 0) {
-    buttonLightOff();
+    onBeatDown();
   }
 
   // Has the Button signal changed?
@@ -97,11 +107,8 @@ void pre() {
   }
 
   // If there is room in the Hektor queue, add some stuff from the moves ArrayList
-  if (hektorQueueLength < 20 && moves.size() > 0) {
-    float x = moves.get(0).x;
-    float y = moves.get(0).y;
-    //println("moving to "+x+" "+y);
-    movePlatform(x, y, 0.5);
+  if (hektorQueueLength < 5 && moves.size() > 0) {
+    movePlatform(moves.get(0).x, moves.get(0).y, speed);
     moves.remove(0);
   }
 
@@ -124,11 +131,12 @@ void pre() {
     } else if (cmd == "goto start") {
       moves.add( start );
     } else if (cmd == "goto end") {
+      speed = map(dist, 0.4, 1, 0.1, 0.2);
       moves.add( end );
     } else if (cmd == "goto home") {
       moves.add( new PVector(0.5, 0) );
-    } else if ( cmd == "prep circle" ) {
-      prepCircle();
+    } else if ( cmd == "fishbone prep circle" ) {
+      fishbonePrepCircle();
     } else if (cmd == "circle") {
       makeCircle();
     } else if ( cmd == "wait for queue") {
@@ -143,6 +151,22 @@ void pre() {
       dualPenHome(1);
     } else if ( cmd == "pen2 home") {
       dualPenHome(1);
+    } else if ( cmd == "fishbone set radius") {
+      fishboneSetRadius();
+    } else if ( cmd == "full speed") {
+      speed = 1.0;
+    } else if ( cmd == "sun speed" ) {
+      speed = 0.2;
+    } else if ( cmd == "goto north" ) {
+      moves.add(north);
+    } else if ( cmd == "goto south" ) {
+      moves.add(south);
+    } else if ( cmd == "goto east" ) {
+      moves.add(east);
+    } else if ( cmd == "goto west" ) {
+      moves.add(west);
+    } else {
+      println("WARNING: unknown command"+cmd);
     }
 
     if (cmdFinished)  commands.remove(0);
@@ -205,7 +229,8 @@ void keyPressed() {
     break;
 
   case 'n':
-    drawLine();
+    //fishbone();
+    mySun();
     break;
 
   case '0':
@@ -329,75 +354,14 @@ void serialEvent(Serial port) {
 ArrayList<String> commands = new ArrayList<String>(); // meta-command strings
 ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands (because the tinyg can only hold 20, this holds the rest)
 
-
 PVector start = new PVector();
 PVector end = new PVector();
 float dist;
 float circleRadius;
 PVector circleCenter = new PVector();
 boolean doTwitch = false;
+float speed = 1.0;
 
-void drawLine() {
-
-  do {
-    start.x = random(0.1, 0.4);
-    start.y = random(0.5, 0.9);
-    dist = random(0.4, 1);
-
-    end.x = start.x + cos(radians(-45)) * dist;
-    end.y = start.y + sin(radians(-45)) * dist;
-  } 
-  while (end.x > 0.8 || end.y < 0.2);
-
-  commands.add( "start drawing" );
-
-  commands.add( "pen1 up" );
-  commands.add( "pen2 up" );
-  commands.add( "pen1 home" );
-  commands.add( "pen2 home" );
-  commands.add( "goto start" );
-  commands.add( "wait for queue" );
-  commands.add( "pen1 down" );
-  commands.add( "pen2 down" );
-
-  for (int i=0; i<200; i++) {
-    commands.add("null");
-  }
-  commands.add( "start twitch" );
-  commands.add( "goto end" );
-  commands.add( "wait for queue" );
-
-  commands.add( "pen1 up" );
-  commands.add( "pen2 up" );
-  commands.add( "pen1 home" );
-  commands.add( "pen2 home" );
-  commands.add( "stop twitch" );
-
-  commands.add( "prep circle" );
-  commands.add( "wait for queue" );
-  commands.add( "pen1 down" );
-
-  commands.add( "circle" );
-  commands.add( "wait for queue" );
-
-  commands.add( "pen1 up");
-  commands.add( "goto home" );
-  commands.add( "wait for queue" );
-  commands.add( "end drawing" );
-}
-
-
-// ---------------------------------------------------------------
-void prepCircle() {
-  circleRadius = random(0.01, 0.1);
-  circleCenter.x = end.x + cos(radians(-45)) * circleRadius;
-  circleCenter.y = end.y + sin(radians(-45)) * circleRadius;
-
-  PVector p = new PVector();
-  p.x = circleCenter.x + cos(0) * circleRadius;
-  p.y = circleCenter.y + sin(0) * circleRadius;
-  moves.add( p );
-}
 
 // ---------------------------------------------------------------
 void makeCircle() {
@@ -415,13 +379,12 @@ void makeCircle() {
 void movePlatform(float x, float y, float speed) {
   float platformX = x * 72 + 24;
   float platformY = y * 72 + 24;
-
   //println("Hektor to "+x+", "+y + ", => " + platformX + ", " + platformY + " - enabled? " + useHektor);
-  hektorGotoXY(platformX, platformY);
+  hektorGotoXY(platformX, platformY, speed);
 }
 
 // ---------------------------------------------------------------
 void movePlatform(float x, float y) {
-  movePlatform(x, y, 0.5);
+  movePlatform(x, y, 1.0);
 }
 

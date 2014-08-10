@@ -41,9 +41,19 @@ void dualPenHome(int pen) {
 
 // twitch pen 1 or 2 at a roughly -45 degree angle (\) - send values -1 to 1
 void dualPenTwitch(int pen, float twitch) {
+  dualPenTwitch(pen, twitch, 0.75*PI);
+}
+void dualPenTwitch(int pen, float twitch, float angle) {
   if (twitch < -1.0 || twitch > 1.0) return;
-  String s = "p" + pen + "t " + twitch;
+  String s = "p" + pen + "t " + twitch + " " + angle;
   dualPenWrite(s);  
+}
+
+// set pen pressure -1.0 to 1.0 
+void dualPenPressure(int pen, float pressure) {
+  if (pressure < -1.0 || pressure > 1.0) return;
+  String s = "p" + pen + "p " + pressure;
+  dualPenWrite(s);
 }
 
 

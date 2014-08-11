@@ -55,7 +55,7 @@ void doVortex() {
 
 void vortexTwitch() {
   twitchAmount = map(Sensor, 212, 1024, -1, 1);
-  twitchAngle = map(moves.size(), 40, 0, radians(-90), radians(270));
+  twitchAngle = map(moves.size(), vortexCircle.length, 0, radians(-90), radians(270));
   dualPenTwitch(1, twitchAmount, twitchAngle);
 
   float amt = cos(millis()/1000.0) * 0.5;
@@ -77,6 +77,6 @@ void vortexIncrement() {
   vortexRadius += 0.8 / float(vortexNumRings);
   println("vortexRadius = "+vortexRadius);
   persist.setFloat("vortexRadius", vortexRadius);
-  saveJSONObject(persist, "data/persist.json");
+  savePersist();
 }
 

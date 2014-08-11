@@ -27,11 +27,15 @@ float twitchAmount;
 ArrayList<String> commands = new ArrayList<String>(); // meta-command strings
 ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands (because the tinyg can only hold 20, this holds the rest)
 
-
 RadioButton moduleChooser;
+
 
 // ---------------------------------------------------------------
 void setup() {
+  loadPersist();
+  starburstSetup();
+  vortexSetup();
+  circlesSetup();
   hektorSetup(); // takes 20-30 seconds!
   dualPenSetup();
   sensorSetup();
@@ -61,20 +65,25 @@ void setup() {
                             ;
                             
   cp5.loadProperties(props);
+  println(Serial.list());
+}
 
+// ---------------------------------------------------------------
+void loadPersist() {
   try {
     persist = loadJSONObject("persist.json");
   } 
   catch(Exception e) {
     persist = new JSONObject();
   }
-
-  starburstSetup();
-  vortexSetup();
-
-  println(Serial.list());
 }
 
+// ---------------------------------------------------------------
+void savePersist() {
+  saveJSONObject(persist, "data/persist.json");
+}
+
+// ---------------------------------------------------------------
 void controlEvent(ControlEvent theEvent) {
   if (theEvent.isFrom(moduleChooser)) {
     println("Saving Properties to "+props);
@@ -103,13 +112,17 @@ void pre() {
       vortexTwitch();
     } else if (twitchStyle == "starburst") {
       starburstTwitch();
+    } else if ( twitchStyle == "fishbone") {
+      fishboneTwitch();
+    } else if( twitchStyle == "circles") {
+      circlesTwitch();
     } else {
       println("twitch style unknown: "+twitchStyle);
     }
   }
 
   // If there is room in the Hektor queue, add some stuff from the moves ArrayList
-  if (hektorQueueLength < 5 && moves.size() > 0) {
+  if (hektorQueueLength < hektorQueueLimit && moves.size() > 0) {
     movePlatform(moves.get(0).x, moves.get(0).y, platformSpeed);
     moves.remove(0);
   }
@@ -138,8 +151,12 @@ void pre() {
       moves.add( new PVector(0.5, 0) );
     } else if ( cmd == "fishbone prep circle" ) {
       fishbonePrepCircle();
-    } else if (cmd == "circle") {
-      makeCircle();
+    } else if (cmd == "circles prep") {
+      circlesPrep();
+    } else if(cmd == "circles draw") {
+      circlesDraw();
+    } else if( cmd == "circles persist" ) {
+      circlesPersist();
     } else if ( cmd == "wait for queue") {
       cmdFinished = (hektorQueueLength==0 && moves.size()==0);
     } else if ( cmd == "start drawing") {
@@ -174,8 +191,6 @@ void pre() {
       triangleSetSpeed();
     } else if ( cmd == "triangles prep") {
       trianglePrep();
-    } else if ( cmd == "circles update") {
-      circlesUpdate();
     } else if ( cmd == "circles prep") {
       circlesPrep();
     } else if ( cmd == "starburst speed") {
@@ -223,7 +238,7 @@ void draw() {
     "commands.size() = "+commands.size(), 
     "moves.size() = " + moves.size(), 
     "current command = " + (commands.size()>0 ? commands.get(0) : ""), 
-    "twitchAngle = " + twitchAngle, 
+    "twitchAngle = " + degrees(twitchAngle), 
     "twitchAmount = " + twitchAmount
   };
   int ystart = 100;
@@ -233,6 +248,17 @@ void draw() {
 
   drawSignal();
   drawHeart(width-30, height/2);
+  
+  if(!hektor_homed) {
+    String s = "NOT HOMED!";
+    pushStyle();
+    noStroke();
+    fill(#FF0000);
+    textFont(font, 28);
+    float x = (width/2.0) - (textWidth(s)/2.0);
+    text(s, x, height/2.0);
+    popStyle();
+  }
 }
 
 

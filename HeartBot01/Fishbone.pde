@@ -50,13 +50,18 @@ void doFishbone() {
   commands.add( "wait for queue" );
   commands.add( "pen2 down" );
 
-  commands.add( "fishbone circle" );
+  commands.add( "circle" );
   commands.add( "wait for queue" );
 
   commands.add( "pen2 up");
   commands.add( "goto home" );
   commands.add( "wait for queue" );
   commands.add( "end drawing" );
+}
+
+// ---------------------------------------------------------------
+void fishboneTwitch() {
+  
 }
 
 // ---------------------------------------------------------------

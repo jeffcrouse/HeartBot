@@ -95,7 +95,7 @@ void starburstIncrement() {
   starburstAngle += 360 / float(starburstNumLines);
   println("starburstAngle = "+starburstAngle);
   persist.setFloat("starburstAngle", starburstAngle);
-  saveJSONObject(persist, "data/persist.json");
+  savePersist();
 }
 
 void starburstSpeed() {

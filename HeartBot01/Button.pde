@@ -9,6 +9,8 @@
 //----------------------------------------------------
 void onButtonUp() {
   println("Button Up");
+  
+  if(!hektor_homed) return;
   int module = int(moduleChooser.getValue());
   switch(module) {
   case 1: 

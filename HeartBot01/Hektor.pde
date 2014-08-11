@@ -66,6 +66,7 @@ float CARRIAGE_WIDTH = 3.5; // separation between left and right supports on car
 Serial tinyg;
 
 int hektorQueueLength = 0;
+int hektorQueueLimit = 5; // SELF IMPOSED LIMIT
 
 boolean hektor_homed = false;
 float XY[] = {

@@ -4,8 +4,10 @@ PVector corners[] = new PVector[3];
 
 
 void doTriangles() {
-  
+
   twitchStyle = "triangles";
+  
+  
   circleRadius = random(0.1, 0.2);
   circleCenter.x = random(0.2, 0.8);
   circleCenter.y = random(0.2, 0.8);

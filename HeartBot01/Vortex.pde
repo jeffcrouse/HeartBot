@@ -9,6 +9,7 @@ void vortexSetup() {
 }
 
 void doVortex() {
+
   twitchStyle = "vortex";
 
   for (int i=0; i<vortexCircle.length; i++) {

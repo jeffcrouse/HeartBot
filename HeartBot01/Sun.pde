@@ -11,7 +11,9 @@ PVector east = new PVector();
 PVector west = new PVector();
 
 void doSun() {
+
   twitchStyle = "sun";
+  
   circleRadius = random(0.1, 0.2);
   circleCenter.x = random(0.2, 0.8);
   circleCenter.y = random(0.2, 0.8);

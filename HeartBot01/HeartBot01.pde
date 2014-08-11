@@ -1,9 +1,11 @@
 import processing.serial.*;
 import controlP5.*;
 
-PFont font;
+
 ControlP5 cp5;
 String props = "bot.properties";
+
+PFont font;
 boolean drawingInProgress = false;
 
 
@@ -13,6 +15,20 @@ boolean useDualPen = true;
 
 JSONObject persist;
 
+// Global Hektor speed -- used whenever coords are put into the Hektor queue by the "moves" ArrayList
+float platformSpeed = 1.0;
+
+// Global twitch variales. 
+boolean doTwitch;
+String twitchStyle;
+float twitchAngle;
+float twitchAmount;
+
+ArrayList<String> commands = new ArrayList<String>(); // meta-command strings
+ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands (because the tinyg can only hold 20, this holds the rest)
+
+
+RadioButton moduleChooser;
 
 // ---------------------------------------------------------------
 void setup() {
@@ -26,30 +42,44 @@ void setup() {
 
   registerPre(this);
   font = loadFont("HelveticaNeue-24.vlw");
-  textFont(font, 18);
+  textFont(font, 14);
+
   cp5 = new ControlP5(this);
-  println("Loading Properties to "+props);
-
-  cp5.addSlider("StdDevThresh")
-    .setBroadcast(false)
-      .setPosition(10, 20)
-        .setSize(300, 20)
-          .setRange(100, 300)
-            .setNumberOfTickMarks(7)
-              .setValue(200);
-
+  moduleChooser = cp5.addRadioButton("moduleChooser")
+    .setPosition(20, 50)
+      .setSize(40, 20)
+        .setColorForeground(color(120))
+          .setColorActive(color(255))
+            .setColorLabel(color(255))
+              .setItemsPerRow(5)
+                .setSpacingColumn(50)
+                  .addItem("circles", 1)
+                    .addItem("fishbone", 2)
+                      .addItem("starburst", 3)
+                        .addItem("triangles", 4)
+                          .addItem("vortex", 5)
+                            ;
+                            
   cp5.loadProperties(props);
 
   try {
     persist = loadJSONObject("persist.json");
-  } catch(Exception e) {
+  } 
+  catch(Exception e) {
     persist = new JSONObject();
   }
-  
+
   starburstSetup();
   vortexSetup();
 
   println(Serial.list());
+}
+
+void controlEvent(ControlEvent theEvent) {
+  if (theEvent.isFrom(moduleChooser)) {
+    println("Saving Properties to "+props);
+    cp5.saveProperties(props);
+  }
 }
 
 // ---------------------------------------------------------------
@@ -63,9 +93,6 @@ void onBeatDown() {
 }
 
 // ---------------------------------------------------------------
-
-float twitchAngle;
-float twitchAmount;
 void pre() {
 
   sensorUpdate();
@@ -165,7 +192,7 @@ void pre() {
       vortexPrep();
     } else if ( cmd == "vortex draw" ) {
       vortexDraw();
-    } else if( cmd == "starburst circle" ) {
+    } else if ( cmd == "starburst circle" ) {
       starburstCircle();
     } else if (cmd == "starburst circle prep") {
       starburstCirclePrep();
@@ -199,13 +226,13 @@ void draw() {
     "twitchAngle = " + twitchAngle, 
     "twitchAmount = " + twitchAmount
   };
-
+  int ystart = 100;
   for (int i=0; i<msg.length; i++) {
-    text(msg[i], 10, 200+(i*20));
+    text(msg[i], 10, ystart+(i*16));
   }
 
   drawSignal();
-  drawHeart(width-30, 10);
+  drawHeart(width-30, height/2);
 }
 
 
@@ -227,20 +254,6 @@ void keyPressed() {
   switch(key) {
   case 'q':
     hektorRequestQueueReport();
-    break;
-
-  case 's':
-    println("Saving Properties to "+props);
-    cp5.saveProperties(props);
-    break;
-
-  case 'n':
-    //doFishbone();
-    //doSun();
-    //doTriangles();
-    //doCircles();
-    doStarburst();
-    //doVortex();
     break;
 
   case '0':
@@ -364,19 +377,18 @@ void serialEvent(Serial port) {
  ╩ ╩└─┘ ┴ ┴ ┴╚═╝└─┘┴ ┴┴ ┴┴ ┴┘└┘─┴┘└─┘
  *************************************/
 
-ArrayList<String> commands = new ArrayList<String>(); // meta-command strings
-ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands (because the tinyg can only hold 20, this holds the rest)
 
+// TO DO: get rid of these -- they are confusing
+// Variables shared by several Modules
 PVector start = new PVector();
 PVector end = new PVector();
+
+
+// TO DO: get rid of these -- they are confusing
+// ---------------------------------------------------------------
+// Function used by several modules
 float circleRadius;
 PVector circleCenter = new PVector();
-
-float platformSpeed = 1.0;
-boolean doTwitch;
-String twitchStyle;
-
-// ---------------------------------------------------------------
 void makeCircle() {
   float inc = radians(360) / 40.0;
   for (float angle = 0; angle < radians (360)+inc; angle+=inc) {
@@ -386,6 +398,8 @@ void makeCircle() {
     moves.add( p );
   }
 }
+
+
 
 // ---------------------------------------------------------------
 // x, y in range 0.0 to 1.0

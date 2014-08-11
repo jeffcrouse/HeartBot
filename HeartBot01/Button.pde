@@ -9,14 +9,31 @@
 //----------------------------------------------------
 void onButtonUp() {
   println("Button Up");
-//  if (heartbeatPresent() && !drawingInProgress) {
-//    startNewDrawing();
-//  }
+  int module = int(moduleChooser.getValue());
+  switch(module) {
+  case 1: 
+    doCircles(); 
+    break;
+  case 2: 
+    doFishbone(); 
+    break;
+  case 3: 
+    doStarburst(); 
+    break;
+  case 4: 
+    doTriangles(); 
+    break;
+  case 5: 
+    doVortex(); 
+    break;
+  }
 }
 
 //----------------------------------------------------
 void onButtonDown() {
   println("Button Down");
+  if (!drawingInProgress) {
+  }
 }
 
 //----------------------------------------------------

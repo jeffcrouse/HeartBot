@@ -16,12 +16,13 @@ void starburstSetup() {
 }
 
 void doStarburst() {
+
   twitchStyle = "starburst";
   float angle;
   float x;
   float y;
-  
-  
+
+
   angle = radians(starburstAngle-90);
   starburstStartRadius = random(0.1, 0.2);
   starburstEndRadius = random(0.4, 0.5);
@@ -72,7 +73,7 @@ void doStarburst() {
   commands.add( "pen2 down" );
   commands.add( "starburst circle" );
   commands.add( "wait for queue" );
-  
+
   commands.add( "pen2 up" );
 
   commands.add( "goto center" );
@@ -92,7 +93,7 @@ void starburstTwitch() {
 
 void starburstIncrement() {
   starburstAngle += 360 / float(starburstNumLines);
-
+  println("starburstAngle = "+starburstAngle);
   persist.setFloat("starburstAngle", starburstAngle);
   saveJSONObject(persist, "data/persist.json");
 }
@@ -109,7 +110,7 @@ void starburstCircle() {
   for (int i=0; i<starburstCircle.length; i++) {
     moves.add( starburstCircle[i] );
   }
-   moves.add( starburstCircle[0] );
+  moves.add( starburstCircle[0] );
 }
 void starburstDrawLine() {
   for (int i=0; i<starburstLine.length; i++) {

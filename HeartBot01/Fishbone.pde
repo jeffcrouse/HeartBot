@@ -9,6 +9,7 @@ float fishboneDist;
 
 void doFishbone() {
   twitchStyle = "fishbone";
+  
   do {
     start.x = random(0.1, 0.4);
     start.y = random(0.5, 0.9);

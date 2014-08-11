@@ -2,7 +2,7 @@
 
 
 
-void circles() {
+void doCircles() {
 
   twitchStyle = "circles";
   commands.add( "start drawing" );

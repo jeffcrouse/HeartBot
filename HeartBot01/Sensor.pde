@@ -26,8 +26,15 @@ int StdDevThreshCounter = 0;  // If the standard deviation stays high for a whil
 int Button = 1;      // Current Button Signal (updated in serialEvent)
 int ButtonLast = 1;  // Button signal as of last pre() - used to determine change events
 
+//----------------------------------------------------
+void sensorSetup() { 
+  if (!useSensor) return;
 
-
+  sPort = new Serial(this, sPortName, 115200); 
+  sPort.clear();            // flush buffer
+  sPort.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
+  buttonLightOff();
+}
 
 //----------------------------------------------------
 void sensorSerialEvent(String inData) {
@@ -57,7 +64,7 @@ boolean heartbeatPresent() {
 }
 
 //----------------------------------------------------
-void crunchSensorData() {
+void sensorUpdate() {
 
   // Deal with the data from the heart rate sensor
   Signal.add( Sensor );
@@ -85,6 +92,26 @@ void crunchSensorData() {
     StdDevThreshCounter++;
   } else {
     StdDevThreshCounter=0;
+  }
+
+
+  // If we have gotten a heartbeat from the sensor, do some stuff.
+  if (beat) {
+    beatCounter = 20;
+    onBeatUp();
+    beat = false;
+  }
+
+  beatCounter--;
+  if (beatCounter == 0) {
+    onBeatDown();
+  }
+
+  // Has the Button signal changed?
+  if (Button!=ButtonLast) {
+    if (Button==0) onButtonDown();
+    else onButtonUp();
+    ButtonLast = Button;
   }
 }
 

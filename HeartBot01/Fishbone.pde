@@ -5,15 +5,17 @@
  ╚  ┴└─┘┴ ┴└─┘└─┘┘└┘└─┘
  *********************/
 
-void fishbone() {
+float fishboneDist;
+
+void doFishbone() {
   twitchStyle = "fishbone";
   do {
     start.x = random(0.1, 0.4);
     start.y = random(0.5, 0.9);
-    dist = random(0.4, 1);
+    fishboneDist = random(0.4, 1);
 
-    end.x = start.x + cos(radians(-45)) * dist;
-    end.y = start.y + sin(radians(-45)) * dist;
+    end.x = start.x + cos(radians(-45)) * fishboneDist;
+    end.y = start.y + sin(radians(-45)) * fishboneDist;
   } 
   while (end.x > 0.8 || end.y < 0.2);
 

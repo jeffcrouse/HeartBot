@@ -7,27 +7,23 @@ String props = "bot.properties";
 boolean drawingInProgress = false;
 
 
-
-/*********************************
- ╔═╗┌─┐┌┐┌┌─┐┌─┐┬─┐  ╔═╗┌┬┐┬ ┬┌─┐┌─┐
- ╚═╗├┤ │││└─┐│ │├┬┘  ╚═╗ │ │ │├┤ ├┤ 
- ╚═╝└─┘┘└┘└─┘└─┘┴└─  ╚═╝ ┴ └─┘└  └  
- *********************************/
 boolean useSensor = true;      // ATTENTION!!!   Set this to false to disable the sensor altogether
 boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
 boolean useDualPen = true;
 
-
+JSONObject persist;
 
 
 // ---------------------------------------------------------------
 void setup() {
   hektorSetup(); // takes 20-30 seconds!
   dualPenSetup();
+  sensorSetup();
 
   size(700, 600);  // Stage size
   frameRate(100);  
   smooth();
+
   registerPre(this);
   font = loadFont("HelveticaNeue-24.vlw");
   textFont(font, 18);
@@ -44,78 +40,50 @@ void setup() {
 
   cp5.loadProperties(props);
 
-  println(Serial.list());
-
-  if (useSensor) {
-    sPort = new Serial(this, sPortName, 115200); 
-    sPort.clear();            // flush buffer
-    sPort.bufferUntil('\n');  // set buffer full flag on receipt of carriage return
-    buttonLightOff();
+  try {
+    persist = loadJSONObject("persist.json");
+  } catch(Exception e) {
+    persist = new JSONObject();
   }
+  
+  starburstSetup();
+  vortexSetup();
 
-  dualPenHome(1);
-  dualPenHome(2);
+  println(Serial.list());
 }
 
-
+// ---------------------------------------------------------------
 void onBeatUp() {
   buttonLightOn();
 }
 
+// ---------------------------------------------------------------
 void onBeatDown() {
   buttonLightOff();
 }
 
 // ---------------------------------------------------------------
-int lastHektorRequestQueueReport = 0;
+
 float twitchAngle;
 float twitchAmount;
 void pre() {
 
-  // Calculate mean, standard deviation, etc
-  crunchSensorData();
+  sensorUpdate();
+  hektorUpdate();
 
   if (doTwitch) {
     if ( twitchStyle == "vortex") {
       vortexTwitch();
-    } else if(twitchStyle == "starburst") {
+    } else if (twitchStyle == "starburst") {
       starburstTwitch();
     } else {
       println("twitch style unknown: "+twitchStyle);
     }
   }
 
-
-
-  // If we have gotten a heartbeat from the sensor, do some stuff.
-  if (beat) {
-    beatCounter = 20;
-    onBeatUp();
-    beat = false;
-  }
-
-  beatCounter--;
-  if (beatCounter == 0) {
-    onBeatDown();
-  }
-
-  // Has the Button signal changed?
-  if (Button!=ButtonLast) {
-    if (Button==0) onButtonDown();
-    else onButtonUp();
-    ButtonLast = Button;
-  }
-
-  // Request a RequestQueueReport every 2 seconds
-  if (millis()-lastHektorRequestQueueReport > 2000) {
-    hektorRequestQueueReport();
-    print("*");
-    lastHektorRequestQueueReport = millis();
-  }
-
   // If there is room in the Hektor queue, add some stuff from the moves ArrayList
-  if (hektorQueueLength < 3 && moves.size() > 0) {
-    movePlatform(moves.get(0).x, moves.get(0).y, speed);
+  if (hektorQueueLength < 5 && moves.size() > 0) {
+    movePlatform(moves.get(0).x, moves.get(0).y, platformSpeed);
     moves.remove(0);
   }
 
@@ -162,7 +130,7 @@ void pre() {
     } else if ( cmd == "fishbone set radius") {
       fishboneSetRadius();
     } else if ( cmd == "full speed") {
-      speed = 1.0;
+      platformSpeed = 1.0;
     } else if ( cmd == "sun speed" ) {
       setSunSpeed();
     } else if ( cmd == "goto north" ) {
@@ -197,6 +165,10 @@ void pre() {
       vortexPrep();
     } else if ( cmd == "vortex draw" ) {
       vortexDraw();
+    } else if( cmd == "starburst circle" ) {
+      starburstCircle();
+    } else if (cmd == "starburst circle prep") {
+      starburstCirclePrep();
     } else {
       println("WARNING: unknown command"+cmd);
     }
@@ -224,7 +196,7 @@ void draw() {
     "commands.size() = "+commands.size(), 
     "moves.size() = " + moves.size(), 
     "current command = " + (commands.size()>0 ? commands.get(0) : ""), 
-    "twitchAngle = " + twitchAngle,
+    "twitchAngle = " + twitchAngle, 
     "twitchAmount = " + twitchAmount
   };
 
@@ -239,11 +211,10 @@ void draw() {
 
 // ---------------------------------------------------------------
 void mousePressed() {
-  float x = map(mouseX, 0, width, 0, 1);
-  float y = map(mouseY, 0, height, 0, 1);
-  movePlatform(x, y);
+  //  float x = map(mouseX, 0, width, 0, 1);
+  //  float y = map(mouseY, 0, height, 0, 1);
+  //  movePlatform(x, y);
 }
-
 
 // ---------------------------------------------------------------
 void mouseReleased() {
@@ -264,12 +235,12 @@ void keyPressed() {
     break;
 
   case 'n':
-    //fishbone();
-    //mySun();
-    //triangles();
-    //circles();
-    starburst();
-    //vortex();
+    //doFishbone();
+    //doSun();
+    //doTriangles();
+    //doCircles();
+    doStarburst();
+    //doVortex();
     break;
 
   case '0':
@@ -398,10 +369,10 @@ ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands 
 
 PVector start = new PVector();
 PVector end = new PVector();
-float dist;
 float circleRadius;
 PVector circleCenter = new PVector();
-float speed = 1.0;
+
+float platformSpeed = 1.0;
 boolean doTwitch;
 String twitchStyle;
 

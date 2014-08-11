@@ -1,14 +1,22 @@
 
 float vortexRadius;
 int vortexNumRings = 50;
+PVector[] vortexCircle = new PVector[40];
 
+void vortexSetup() {
+  vortexRadius = persist.getFloat("vortexRadius", 0.2);
+  println("vortexRadius = "+vortexRadius);
+}
 
-void vortex() {
+void doVortex() {
   twitchStyle = "vortex";
-  String lines[] = loadStrings("vortexRadius.txt");
-  vortexRadius = (lines == null) ? 0.2 : float( lines[0] ); 
 
-
+  for (int i=0; i<vortexCircle.length; i++) {
+    float angle = map(i, 0, 40, radians(-90), radians(270));
+    float x = 0.5 + cos(angle) * vortexRadius;
+    float y = 0.5 + sin(angle) * vortexRadius;
+    vortexCircle[i] = new PVector(x, y);
+  }
 
   commands.add( "start drawing" );
   commands.add( "pen1 up" );
@@ -35,11 +43,12 @@ void vortex() {
   commands.add( "pen2 up" );
   commands.add( "pen1 home" );
   commands.add( "pen2 home" );
+  commands.add( "vortex increment" );
 
   commands.add( "goto center" );
   commands.add( "wait for queue" );
 
-  commands.add( "vortex increment" );
+
   commands.add( "end drawing" );
 }
 
@@ -53,29 +62,20 @@ void vortexTwitch() {
 }
 
 void vortexPrep() {
-  PVector p = new PVector();
-  p.x = 0.5 + cos( radians(-90) ) * vortexRadius;
-  p.y = 0.5 + sin( radians(-90) ) * vortexRadius;
-  moves.add( p );
+  moves.add( vortexCircle[0] );
 }
 
-
 void vortexDraw() {
-  speed = 0.5; // TO DO: shoudl be proportional to the radius.
-  for (int i=0; i<41; i++) {
-    float angle = map(i, 0, 40, radians(-90), radians(270));
-    PVector p = new PVector();
-    p.x = 0.5 + cos(angle) * vortexRadius;
-    p.y = 0.5 + sin(angle) * vortexRadius;
-    moves.add( p );
+  platformSpeed = 0.5; // TO DO: should be proportional to the radius.
+  for (int i=0; i<vortexCircle.length; i++) {
+    moves.add( vortexCircle[i] );
   }
 }
 
 void vortexIncrement() {
   vortexRadius += 0.8 / float(vortexNumRings);
-  String[] list = {   
-    str(vortexRadius)
-    };
-    saveStrings("vortexRadius.txt", list);
+  println("vortexRadius = "+vortexRadius);
+  persist.setFloat("vortexRadius", vortexRadius);
+  saveJSONObject(persist, "data/persist.json");
 }
 

@@ -29,14 +29,14 @@ String TINYG_INITIALIZERS[] = {
   "$2mi=8", 
 
   "G90", // absolute positioning mode
-  
+
   "G64", // continuous path mode
-  "$kjd=1.0",  // it's okay to decelerate even if it means that you will miss your path by .2 inches.
+  "$kjd=1.0", // it's okay to decelerate even if it means that you will miss your path by .2 inches.
   "$yjd=1.0", // it's okay to decelerate even if it means that you will miss your path by .2 inches.
-  
+
   //"G61.1", // exact path mode
   "G61", // exact stop mode
-  
+
   "$mt=300", // wait 5 minutes idle before unpowering motors
 
   "$qv=1"    // verbose queue reports
@@ -95,6 +95,7 @@ void hektorSetup() {
 void hektorGotoXY(float X, float Y) {
   hektorGotoXY(X, Y, 1.0);
 }
+
 void hektorGotoXY(float X, float Y, float speed) {
   if (!useHektor) return;
 
@@ -152,13 +153,13 @@ void hektorJogRaw(float dx, float dy) {
 }
 
 void hektorSerialEvent(String data) {
-  //println("Hektor serial event " + data);
+  //println("Hektor serial event '" + data+"'");
   String[] m = match(data, "qr:(\\d+)");
   if (m != null) {
     int qr = Integer.parseInt(m[1]);
     hektorQueueLength = 28 - qr;
     //println("Hektor queue: " + hektorQueueLength);
-  }
+  } 
 }
 
 void hektorRequestQueueReport() {
@@ -168,3 +169,14 @@ void hektorRequestQueueReport() {
 void hektorMotorsOff() {
   tinyg.write("$md\n");
 }
+
+// Request a RequestQueueReport every 2 seconds
+int lastHektorRequestQueueReport = 0;
+void hektorUpdate() {
+  if (millis()-lastHektorRequestQueueReport > 2000) {
+    hektorRequestQueueReport();
+    print("*");
+    lastHektorRequestQueueReport = millis();
+  }
+}
+

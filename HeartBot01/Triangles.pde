@@ -3,7 +3,8 @@
 PVector corners[] = new PVector[3];
 
 
-void triangles() {
+void doTriangles() {
+  
   twitchStyle = "triangles";
   circleRadius = random(0.1, 0.2);
   circleCenter.x = random(0.2, 0.8);
@@ -68,6 +69,6 @@ void makeTriangle() {
 }
 
 void triangleSetSpeed() {
-  speed = 0.3;
+  platformSpeed = 0.3;
 }
 

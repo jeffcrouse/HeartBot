@@ -10,7 +10,7 @@ PVector south = new PVector();
 PVector east = new PVector();
 PVector west = new PVector();
 
-void sun() {
+void doSun() {
   twitchStyle = "sun";
   circleRadius = random(0.1, 0.2);
   circleCenter.x = random(0.2, 0.8);
@@ -76,6 +76,6 @@ void sun() {
 }
 
 void setSunSpeed() {
-  speed = map(circleRadius, 0.1, 0.2, 0.2, 0.4);
+  platformSpeed = map(circleRadius, 0.1, 0.2, 0.2, 0.4);
 }
 

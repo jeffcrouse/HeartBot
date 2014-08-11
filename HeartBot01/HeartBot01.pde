@@ -59,7 +59,7 @@ void setup() {
 
 
 void onBeatUp() {
-  if (heartbeatPresent()) buttonLightOn();
+  buttonLightOn();
 }
 
 void onBeatDown() {
@@ -68,20 +68,24 @@ void onBeatDown() {
 
 // ---------------------------------------------------------------
 int lastHektorRequestQueueReport = 0;
+float twitchAngle;
+float twitchAmount;
 void pre() {
 
   // Calculate mean, standard deviation, etc
   crunchSensorData();
 
   if (doTwitch) {
-    float amt = map(Sensor, 212, 1024, -1, 1);
-    amt *= map(moves.size(), 0, 100, 1, 0.1);
-    
-    //float angle = map(moves.size(), 40, 0, 0, PI*2);
-    
-    float angle = radians(starburstAngle);
-    dualPenTwitch(1, amt, angle);
+    if ( twitchStyle == "vortex") {
+      vortexTwitch();
+    } else if(twitchStyle == "starburst") {
+      starburstTwitch();
+    } else {
+      println("twitch style unknown: "+twitchStyle);
+    }
   }
+
+
 
   // If we have gotten a heartbeat from the sensor, do some stuff.
   if (beat) {
@@ -110,7 +114,7 @@ void pre() {
   }
 
   // If there is room in the Hektor queue, add some stuff from the moves ArrayList
-  if (hektorQueueLength < 5 && moves.size() > 0) {
+  if (hektorQueueLength < 3 && moves.size() > 0) {
     movePlatform(moves.get(0).x, moves.get(0).y, speed);
     moves.remove(0);
   }
@@ -187,6 +191,12 @@ void pre() {
       moves.add( new PVector(0.5, 0.5) );
     } else if ( cmd ==  "starburst increment" ) {
       starburstIncrement();
+    } else if ( cmd == "vortex increment" ) {
+      vortexIncrement();
+    } else if ( cmd == "vortex prep" ) {
+      vortexPrep();
+    } else if ( cmd == "vortex draw" ) {
+      vortexDraw();
     } else {
       println("WARNING: unknown command"+cmd);
     }
@@ -214,7 +224,8 @@ void draw() {
     "commands.size() = "+commands.size(), 
     "moves.size() = " + moves.size(), 
     "current command = " + (commands.size()>0 ? commands.get(0) : ""), 
-    "starburstAngle = " + starburstAngle
+    "twitchAngle = " + twitchAngle,
+    "twitchAmount = " + twitchAmount
   };
 
   for (int i=0; i<msg.length; i++) {
@@ -258,6 +269,7 @@ void keyPressed() {
     //triangles();
     //circles();
     starburst();
+    //vortex();
     break;
 
   case '0':
@@ -320,6 +332,10 @@ void keyPressed() {
   case '-':
     dualPenSetPen(1, false);
     dualPenSetPen(2, false);
+    break;
+
+  case '`':
+    hektorMotorsOff();
     break;
 
 
@@ -385,9 +401,9 @@ PVector end = new PVector();
 float dist;
 float circleRadius;
 PVector circleCenter = new PVector();
-boolean doTwitch = false;
 float speed = 1.0;
-
+boolean doTwitch;
+String twitchStyle;
 
 // ---------------------------------------------------------------
 void makeCircle() {
@@ -403,8 +419,8 @@ void makeCircle() {
 // ---------------------------------------------------------------
 // x, y in range 0.0 to 1.0
 void movePlatform(float x, float y, float speed) {
-  float platformX = x * 72 + 24;
-  float platformY = y * 72 + 24;
+  float platformX = x * 72 + 22;
+  float platformY = y * 72 + 22;
   //println("Hektor to "+x+", "+y + ", => " + platformX + ", " + platformY + " - enabled? " + useHektor);
   hektorGotoXY(platformX, platformY, speed);
 }

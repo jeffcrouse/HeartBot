@@ -10,8 +10,8 @@ PVector south = new PVector();
 PVector east = new PVector();
 PVector west = new PVector();
 
-void mySun() {
-
+void sun() {
+  twitchStyle = "sun";
   circleRadius = random(0.1, 0.2);
   circleCenter.x = random(0.2, 0.8);
   circleCenter.y = random(0.2, 0.8);
@@ -58,7 +58,7 @@ void mySun() {
   commands.add( "pen1 down" );
   commands.add( "pen2 down" );
   commands.add( "sun speed" );
-  commands.add( "start twitch" );
+  commands.add( "sun start twitch" );
 
   commands.add( "circle" );
   commands.add( "wait for queue" );

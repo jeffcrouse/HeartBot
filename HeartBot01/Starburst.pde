@@ -1,23 +1,29 @@
 
 
+// TO DO: shish kebab
+
 float starburstAngle = 0;
 int starburstNumLines = 50;
-
-
+PVector starburstPoints[] = new PVector[30];
 
 void starburst() {
-
+  twitchStyle = "starburst";
   String lines[] = loadStrings("starburstAngle.txt");
-  if (lines == null) {
-    starburstAngle = 0;
-  } else {
-    starburstAngle = float( lines[0] );
-  }
+  starburstAngle = (lines == null) ? 0 : float( lines[0] );
+
 
   float angle = radians(starburstAngle-90);
-  start.x = 0.5 + cos(angle) * 0.1;
-  start.y = 0.5 + sin(angle) * 0.1;
+  float startRadius = random(0.1, 0.2);
+  float endRadius = random(0.4, 0.5);
 
+  for (int i=0; i<starburstPoints.length; i++) {
+    float dist = map(i, 0, starburstPoints.length, startRadius, endRadius);
+    float x = 0.5 + cos(angle) * dist;
+    float y = 0.5 + sin(angle) * dist;
+    starburstPoints[i] = new PVector(x, y);
+  }
+
+  start = starburstPoints[0];
 
   commands.add( "start drawing" );
   commands.add( "pen1 up" );
@@ -36,7 +42,6 @@ void starburst() {
   commands.add( "starburst draw line" );
   commands.add( "wait for queue" );
 
-
   commands.add( "full speed" );
   commands.add( "stop twitch" );
   commands.add( "pen1 up" );
@@ -44,19 +49,27 @@ void starburst() {
   commands.add( "pen1 home" );
   commands.add( "pen2 home" );
 
-  commands.add( "goto start" );
+  commands.add( "goto center" );
   commands.add( "wait for queue" );
 
   commands.add( "starburst increment" );
   commands.add( "end drawing" );
 }
 
+void starburstTwitch() {
+  twitchAmount = map(Sensor, 212, 1024, -1, 1);
+  twitchAmount *= map(moves.size(), 0, starburstPoints.length, 1, 0.1);
+  twitchAngle = radians(starburstAngle);
+  dualPenTwitch(1, twitchAmount, twitchAngle);
+}
+
 void starburstIncrement() {
   starburstAngle += 360 / float(starburstNumLines);
 
-  String[] list = new String[1];
-  list[0] = str(starburstAngle);
-  saveStrings("starburstAngle.txt", list);
+  String[] list = {  
+    str(starburstAngle)
+    };
+    saveStrings("starburstAngle.txt", list);
 }
 
 void starburstSpeed() {
@@ -64,16 +77,8 @@ void starburstSpeed() {
 }
 
 void starburstDrawLine() {
-
-  float angle = radians(starburstAngle-90);
-  float distance = 0;
-  float inc = 0.5 / 100.0;
-
-  for (float d=0.1; d < 0.4; d += inc) {
-    PVector p = new PVector();
-    p.x = 0.5 + cos(angle) * d;
-    p.y = 0.5 + sin(angle) * d;
-    moves.add( p );
+  for (int i=0; i<starburstPoints.length; i++) {
+    moves.add( starburstPoints[i] );
   }
 }
 

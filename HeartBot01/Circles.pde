@@ -2,9 +2,9 @@
 
 
 
-
 void circles() {
 
+  twitchStyle = "circles";
   commands.add( "start drawing" );
   commands.add( "pen1 up" );
   commands.add( "pen2 up" );

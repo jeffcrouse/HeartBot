@@ -53,7 +53,7 @@ void doStarburst() {
   while (starburstIndexUsed (starburstIndex));
 
   starburstAngle = map(starburstIndex, 0, starburstNumLines, 0, PI*2);
-  starburstStartRadius = random(0.05, 0.1);
+  starburstStartRadius = 0.075;
   starburstEndRadius = random(0.35, 0.4);
 
   for (int i=0; i<starburstLine.length; i++) {
@@ -64,7 +64,6 @@ void doStarburst() {
   }
 
   start = starburstLine[0];
-
 
 
   commands.add( "start drawing" );
@@ -116,13 +115,12 @@ void doStarburst() {
 
 void starburstTwitch() {
   twitchAmount = map(Sensor, 212, 1024, -1, 1);
-  twitchAmount *= map(moves.size(), 0, starburstLine.length, 1, 0.1);
+  twitchAmount *= map(moves.size(), 0, starburstLine.length, 1, 0.25);
   twitchAngle = starburstAngle - radians(90);
 
   dualPenTwitch(1, twitchAmount, twitchAngle);
   dualPenTwitch(2, 0.5, 1.0);
 }
-
 
 void starburstTwitch2() {
   float t = millis()/100.0;
@@ -160,6 +158,8 @@ void  starburstCirclePrep() {
 
   float radius = map(BPM, 60, 80, 0.02, 0.06); //0.05;
   
+  if(radius>0.06) radius = 0.06;
+  if(radius<0.02) radius = 0.02;
   
   PVector center = starburstLine[starburstLine.length-1];
   for (int i=0; i<starburstCircle.length; i++) {

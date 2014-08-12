@@ -104,6 +104,7 @@ void hektorGotoXY(float X, float Y, float speed) {
     println("NOT HOMED!");
     return;
   }
+
   float N = REVERSE * (float)Math.sqrt( (X-CARRIAGE_WIDTH/2)*(X-CARRIAGE_WIDTH/2) + Y*Y );
   float M = REVERSE * -1 * (float)Math.sqrt( (HEKTOR_WIDTH-X-CARRIAGE_WIDTH/2)*(HEKTOR_WIDTH-X-CARRIAGE_WIDTH/2) + Y*Y );
   String gcode = "G01 X" + nf(M, 0, 2) + " Y" + nf(N, 0, 2) + " F" + nf(FEED_RATE*speed, 0, 2);

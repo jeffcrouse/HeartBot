@@ -1,5 +1,10 @@
 {
-  "starburstUsedIndices": [],
+  "starburstUsedIndices": [
+    1,
+    17,
+    46,
+    36
+  ],
   "vortexRadius": 0.2160000056028366,
   "starburstAngle": 0,
   "circlesGrid": []

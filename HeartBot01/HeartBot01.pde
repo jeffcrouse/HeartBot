@@ -51,6 +51,7 @@ void setup() {
   textFont(font, 14);
 
   cp5 = new ControlP5(this);
+  
   moduleChooser = cp5.addRadioButton("moduleChooser")
     .setPosition(20, 50)
       .setSize(40, 20)
@@ -98,19 +99,16 @@ void savePersist() {
 
 // ---------------------------------------------------------------
 void controlEvent(ControlEvent theEvent) {
+  
   if (theEvent.isFrom(moduleChooser)) {
     println("Saving Properties to "+props);
     cp5.saveProperties(props);
-  }
-
-  if (theEvent.isFrom(pen1pressure)) {
+  } else  if (theEvent.isFrom(pen1pressure)) {
     float pressure = pen1pressure.getValue();
     println( "pen1pressure = "+pressure);
     dualPenPressure(1, pressure);
     cp5.saveProperties(props);
-  }
-
-  if (theEvent.isFrom(pen2pressure)) {
+  } else if (theEvent.isFrom(pen2pressure)) {
     float pressure = pen2pressure.getValue();
     dualPenPressure(2, pressure);
     println( "pen2pressure = "+pressure);
@@ -484,6 +482,14 @@ void makeCircle() {
 // ---------------------------------------------------------------
 // x, y in range 0.0 to 1.0
 void movePlatform(float x, float y, float speed) {
+    
+  if(x>1) x = 1.0;
+  if(x<0) x = 0.0;
+  if(y>1) y = 1.0;
+  if(y<0) y = 0.0;
+  
+  
+  
   float platformX = x * 72 + 22;
   float platformY = y * 72 + 22;
   //println("Hektor to "+x+", "+y + ", => " + platformX + ", " + platformY + " - enabled? " + useHektor);

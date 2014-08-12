@@ -1,34 +1,35 @@
 
 
 PVector corners[] = new PVector[3];
+float triangleStartAngle;
+float angles[] = new float[3];
 
 
 void doTriangles() {
 
   twitchStyle = "triangles";
-  
-  
-  circleRadius = random(0.1, 0.2);
+
+  circleRadius = random(0.05, 0.15);
   circleCenter.x = random(0.2, 0.8);
   circleCenter.y = random(0.2, 0.8);
 
-  float angle = random(0, PI*2);
+
+  angles[0] = random(0, TWO_PI);
+  angles[1] = angles[0] + (TWO_PI / 3.0);
+  angles[2] = angles[1] + (TWO_PI / 3.0);
 
   corners[0] = new PVector();
-  corners[0].x = circleCenter.x + cos(angle) * circleRadius;
-  corners[0].y = circleCenter.y + sin(angle) * circleRadius;
-
-  angle += (PI*2) / 3.0;
+  corners[0].x = circleCenter.x + cos(angles[0]) * circleRadius;
+  corners[0].y = circleCenter.y + sin(angles[0]) * circleRadius;
 
   corners[1] = new PVector();
-  corners[1].x = circleCenter.x + cos(angle) * circleRadius;
-  corners[1].y = circleCenter.y + sin(angle) * circleRadius;
-
-  angle += (PI*2) / 3.0;
+  corners[1].x = circleCenter.x + cos(angles[1]) * circleRadius;
+  corners[1].y = circleCenter.y + sin(angles[1]) * circleRadius;
 
   corners[2] = new PVector();
-  corners[2].x = circleCenter.x + cos(angle) * circleRadius;
-  corners[2].y = circleCenter.y + sin(angle) * circleRadius;
+  corners[2].x = circleCenter.x + cos(angles[2]) * circleRadius;
+  corners[2].y = circleCenter.y + sin(angles[2]) * circleRadius;
+
 
   commands.add( "start drawing" );
   commands.add( "pen1 up" );
@@ -44,7 +45,15 @@ void doTriangles() {
   commands.add( "start twitch" );
 
   commands.add( "triangles speed");
-  commands.add( "make triangle" );
+
+  commands.add( "triangles one" );
+  commands.add( "wait for queue" );
+  commands.add( "triangles two" );
+  commands.add( "wait for queue" );
+  commands.add( "triangles three" );
+  commands.add( "wait for queue" );
+
+
   commands.add( "wait for queue" );
 
   commands.add( "stop twitch" );
@@ -60,22 +69,41 @@ void doTriangles() {
   commands.add( "end drawing" );
 }
 
+// ------------------------------------
 void trianglesTwitch() {
-    twitchAmount = map(Sensor, 212, 1024, -1, 1);
-  twitchAngle = map(moves.size(), vortexCircle.length, 0, 0, PI*2);
+  twitchAmount = map(Sensor, 212, 1024, -1, 1);
   dualPenTwitch(1, twitchAmount, twitchAngle);
+  
+   float t = millis();
+  dualPenSetPen(2, cos(t) > 0);
 }
 
+
+// ------------------------------------
 void trianglePrep() {
   moves.add( corners[0] );
 }
 
-void makeTriangle() {
+// ------------------------------------
+void trianglesOne() {
+  twitchAngle = angles[2];
   moves.add( corners[1] );
+}
+
+// ------------------------------------
+void trianglesTwo() {
+  twitchAngle = angles[0];
   moves.add( corners[2] );
+}
+
+// ------------------------------------
+void trianglesThree() {
+  twitchAngle = angles[1];
   moves.add( corners[0] );
 }
 
+
+// ------------------------------------
 void triangleSetSpeed() {
   platformSpeed = 0.3;
 }

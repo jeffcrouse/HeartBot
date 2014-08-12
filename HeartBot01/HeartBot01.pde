@@ -198,12 +198,16 @@ void pre() {
       moves.add(east);
     } else if ( cmd == "goto west" ) {
       moves.add(west);
-    } else if ( cmd == "make triangle" ) {
-      makeTriangle();
     } else if ( cmd == "triangles speed" ) {
       triangleSetSpeed();
     } else if ( cmd == "triangles prep") {
       trianglePrep();
+    } else if ( cmd == "triangles one" ) {
+      trianglesOne();
+    } else if ( cmd == "triangles two" ) {
+      trianglesTwo();
+    } else if ( cmd == "triangles three" ) {
+      trianglesThree();
     } else if ( cmd == "circles prep") {
       circlesPrep();
     } else if ( cmd == "starburst speed") {

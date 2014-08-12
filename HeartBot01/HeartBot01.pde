@@ -129,7 +129,7 @@ void pre() {
       fishboneTwitch();
     } else if ( twitchStyle == "circles") {
       circlesTwitch();
-    } else if( twitchStyle == "starburst2") {
+    } else if ( twitchStyle == "starburst2") {
       starburstTwitch2();
     } else {
       println("twitch style unknown: "+twitchStyle);
@@ -186,8 +186,6 @@ void pre() {
       dualPenHome(1);
     } else if ( cmd == "pen2 home") {
       dualPenHome(2);
-    } else if ( cmd == "fishbone set radius") {
-      fishboneSetRadius();
     } else if ( cmd == "full speed") {
       platformSpeed = 1.0;
     } else if ( cmd == "sun speed" ) {
@@ -232,6 +230,14 @@ void pre() {
       starburstCircle();
     } else if (cmd == "starburst circle prep") {
       starburstCirclePrep();
+    } else if ( cmd == "fishbone prep line") {
+      fishbonePrepLine();
+    } else if ( cmd == "fishbone draw line") {
+      fishboneDrawLine();
+    } else if ( cmd == "fishbone prep circle") {
+      fishbonePrepCircle();
+    } else if ( cmd == "fishbone draw circle") {
+      fishboneDrawCircle();
     } else {
       println("WARNING: unknown command"+cmd);
     }

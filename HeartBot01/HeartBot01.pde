@@ -63,7 +63,7 @@ void setup() {
                         .addItem("triangles", 4)
                           .addItem("vortex", 5)
                             ;
-                            
+
   cp5.loadProperties(props);
   println(Serial.list());
 }
@@ -94,11 +94,22 @@ void controlEvent(ControlEvent theEvent) {
 // ---------------------------------------------------------------
 void onBeatUp() {
   buttonLightOn();
+
+  if (doTwitch) {
+    if (twitchStyle == "starburst") {
+      starburstOnBeatUp();
+    }
+  }
 }
 
 // ---------------------------------------------------------------
 void onBeatDown() {
   buttonLightOff();
+  if (doTwitch) {
+    if (twitchStyle == "starburst") {
+      starburstOnBeatDown();
+    }
+  }
 }
 
 // ---------------------------------------------------------------
@@ -110,12 +121,16 @@ void pre() {
   if (doTwitch) {
     if ( twitchStyle == "vortex") {
       vortexTwitch();
+    } else if (twitchStyle == "triangles") {
+      trianglesTwitch();
     } else if (twitchStyle == "starburst") {
       starburstTwitch();
     } else if ( twitchStyle == "fishbone") {
       fishboneTwitch();
-    } else if( twitchStyle == "circles") {
+    } else if ( twitchStyle == "circles") {
       circlesTwitch();
+    } else if( twitchStyle == "starburst2") {
+      starburstTwitch2();
     } else {
       println("twitch style unknown: "+twitchStyle);
     }
@@ -153,9 +168,9 @@ void pre() {
       fishbonePrepCircle();
     } else if (cmd == "circles prep") {
       circlesPrep();
-    } else if(cmd == "circles draw") {
+    } else if (cmd == "circles draw") {
       circlesDraw();
-    } else if( cmd == "circles persist" ) {
+    } else if ( cmd == "circles persist" ) {
       circlesPersist();
     } else if ( cmd == "wait for queue") {
       cmdFinished = (hektorQueueLength==0 && moves.size()==0);
@@ -197,10 +212,16 @@ void pre() {
       starburstSpeed();
     } else if ( cmd == "starburst draw line") {
       starburstDrawLine();
+    } else if ( cmd == "starburst line prep") {
+      starburstPrepLine();
+    } else if (cmd == "starburst twitch2 start") {
+      starburstTwitch2Start();
+    } else if (cmd == "starburst twitch2 end") {
+      starburstTwitch2End();
     } else if ( cmd == "goto center") {
       moves.add( new PVector(0.5, 0.5) );
-    } else if ( cmd ==  "starburst increment" ) {
-      starburstIncrement();
+    } else if ( cmd ==  "starburst persist" ) {
+      starburstPersist();
     } else if ( cmd == "vortex increment" ) {
       vortexIncrement();
     } else if ( cmd == "vortex prep" ) {
@@ -248,8 +269,8 @@ void draw() {
 
   drawSignal();
   drawHeart(width-30, height/2);
-  
-  if(!hektor_homed) {
+
+  if (!hektor_homed) {
     String s = "NOT HOMED!";
     pushStyle();
     noStroke();

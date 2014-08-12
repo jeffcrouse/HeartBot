@@ -6,6 +6,8 @@
  *********************/
 
 float fishboneDist;
+PVector[] fishboneLine = new PVector[30];
+
 
 void doFishbone() {
   twitchStyle = "fishbone";
@@ -20,20 +22,29 @@ void doFishbone() {
   } 
   while (end.x > 0.8 || end.y < 0.2);
 
+
+  for(int i=0; i<fishboneLine.size(); i++) {
+    float amt = i / (float(fishboneLine.size());
+    float x = start.x + (end.x-start.x * amt);
+    float y = start.y + (end.y-start.y * amt);
+    
+    fishboneLine.add( new PVector(x, y) );
+  }
+  
+ 
   commands.add( "start drawing" );
 
   commands.add( "pen1 up" );
   commands.add( "pen2 up" );
   commands.add( "pen1 home" );
   commands.add( "pen2 home" );
+  
   commands.add( "goto start" );
   commands.add( "wait for queue" );
   commands.add( "pen1 down" );
   commands.add( "pen2 down" );
 
-  for (int i=0; i<100; i++) {
-    commands.add("null");
-  }
+  
   commands.add( "start twitch" );
   commands.add( "goto end" );
   commands.add( "wait for queue" );
@@ -44,9 +55,13 @@ void doFishbone() {
   commands.add( "pen2 home" );
   commands.add( "stop twitch" );
 
+  commands.add( "full speed" );
+
   commands.add( "fishbone set radius" );
   commands.add( "fishbone prep circle" );
-  commands.add( "full speed" );
+  
+  
+  
   commands.add( "wait for queue" );
   commands.add( "pen2 down" );
 

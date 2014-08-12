@@ -176,7 +176,7 @@ int lastHektorRequestQueueReport = 0;
 void hektorUpdate() {
   if (millis()-lastHektorRequestQueueReport > 2000) {
     hektorRequestQueueReport();
-    print("*");
+    //print("*");
     lastHektorRequestQueueReport = millis();
   }
 }

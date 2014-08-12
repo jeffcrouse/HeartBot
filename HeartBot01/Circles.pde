@@ -1,9 +1,9 @@
 
-
 int gridSize = 8;
 PVector circlePts[] = new PVector[100];
 JSONArray circlesGrid;
 int circlesCell;
+
 
 void circlesSetup() {
   try {
@@ -11,28 +11,29 @@ void circlesSetup() {
   } 
   catch(Exception e) {
     circlesGrid = new JSONArray();
-    for(int i=0; i<gridSize*gridSize; i++) {
+    for (int i=0; i<gridSize*gridSize; i++) {
       circlesGrid.setBoolean(i, false);
     }
   }
-  println( circlesGrid );
 }
 
 
 void doCircles() {
+
   twitchStyle = "circles";
-  
+
   // Pick a cell that is set to false (meaning it is unused)
   int row;
   int col;
   do {
-      row = int(random(1, gridSize-1));
-      col = int(random(1, gridSize-1));
-      circlesCell = (row*gridSize) + col;
-  } while(circlesGrid.getBoolean(circlesCell)==true);
+    row = int(random(1, gridSize-1));
+    col = int(random(1, gridSize-1));
+    circlesCell = (row*gridSize) + col;
+  } 
+  while (circlesGrid.getBoolean (circlesCell)==true);
 
   println( "cell = "+circlesCell+" row = "+row+" col = "+col);
-  
+
   PVector center = new PVector();
   center.x = (1/float(gridSize)) * row;
   center.y = (1/float(gridSize)) * col;
@@ -71,9 +72,9 @@ void doCircles() {
   commands.add( "pen2 down" );
   commands.add( "goto south" );
   commands.add( "wait for queue" );
-  
+
   commands.add( "circles persist" );
-  
+
   commands.add( "pen2 up" );
   commands.add( "goto west" );
   commands.add( "wait for queue" );
@@ -104,8 +105,7 @@ void doCircles() {
 
 void circlesTwitch() {
   twitchAmount = map(Sensor, 212, 1024, -1, 1);
-  twitchAngle = map(moves.size(), vortexCircle.length, 0, radians(-90), radians(270));
-  
+  twitchAngle = map(moves.size(), vortexCircle.length, 0, 0, PI*2);
   dualPenTwitch(1, twitchAmount, twitchAngle);
 }
 

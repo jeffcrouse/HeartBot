@@ -60,6 +60,12 @@ void doTriangles() {
   commands.add( "end drawing" );
 }
 
+void trianglesTwitch() {
+    twitchAmount = map(Sensor, 212, 1024, -1, 1);
+  twitchAngle = map(moves.size(), vortexCircle.length, 0, 0, PI*2);
+  dualPenTwitch(1, twitchAmount, twitchAngle);
+}
+
 void trianglePrep() {
   moves.add( corners[0] );
 }

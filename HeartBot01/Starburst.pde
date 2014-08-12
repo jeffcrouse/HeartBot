@@ -95,8 +95,6 @@ void doStarburst() {
   commands.add( "starburst circle prep" );
   commands.add( "wait for queue" );
 
-
-  commands.add( "pen2 down" );
   commands.add( "starburst twitch2 start" );
   commands.add( "starburst circle" );
   commands.add( "wait for queue" );
@@ -104,7 +102,8 @@ void doStarburst() {
   commands.add( "starburst twitch2 end" );
 
   commands.add( "pen2 up" );
-
+   commands.add( "pen1 up" );
+   
   //commands.add( "starburst line prep" );
   //commands.add( "wait for queue" );
 
@@ -126,8 +125,8 @@ void starburstTwitch() {
 
 
 void starburstTwitch2() {
-  float t = millis();
-  dualPenSetPen(2, cos(t) > 0);
+  float t = millis()/100.0;
+  dualPenSetPen(1, cos(t) > 0);
 }
 
 void starburstOnBeatUp() {
@@ -160,6 +159,8 @@ void starburstSpeed() {
 void  starburstCirclePrep() {
 
   float radius = map(BPM, 60, 80, 0.02, 0.06); //0.05;
+  
+  
   PVector center = starburstLine[starburstLine.length-1];
   for (int i=0; i<starburstCircle.length; i++) {
     float angle = map(i, 0, starburstCircle.length, 0, PI*2);

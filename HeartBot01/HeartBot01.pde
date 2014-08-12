@@ -28,10 +28,12 @@ ArrayList<String> commands = new ArrayList<String>(); // meta-command strings
 ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands (because the tinyg can only hold 20, this holds the rest)
 
 RadioButton moduleChooser;
-
+Slider pen1pressure;
+Slider pen2pressure;
 
 // ---------------------------------------------------------------
 void setup() {
+  println(Serial.list());
   loadPersist();
   starburstSetup();
   vortexSetup();
@@ -64,8 +66,19 @@ void setup() {
                           .addItem("vortex", 5)
                             ;
 
+  pen1pressure = cp5.addSlider("pen1pressure")
+    .setPosition(20, 100)
+      .setRange(-1, 1)
+        .setSize(300, 20)
+          ;
+
+  pen2pressure = cp5.addSlider("pen2pressure")
+    .setPosition(20, 150)
+      .setRange(-1, 1)
+        .setSize(300, 20)
+          ;
+
   cp5.loadProperties(props);
-  println(Serial.list());
 }
 
 // ---------------------------------------------------------------
@@ -87,6 +100,20 @@ void savePersist() {
 void controlEvent(ControlEvent theEvent) {
   if (theEvent.isFrom(moduleChooser)) {
     println("Saving Properties to "+props);
+    cp5.saveProperties(props);
+  }
+
+  if (theEvent.isFrom(pen1pressure)) {
+    float pressure = pen1pressure.getValue();
+    println( "pen1pressure = "+pressure);
+    dualPenPressure(1, pressure);
+    cp5.saveProperties(props);
+  }
+
+  if (theEvent.isFrom(pen2pressure)) {
+    float pressure = pen2pressure.getValue();
+    dualPenPressure(2, pressure);
+    println( "pen2pressure = "+pressure);
     cp5.saveProperties(props);
   }
 }
@@ -272,9 +299,9 @@ void draw() {
     "twitchAngle = " + degrees(twitchAngle), 
     "twitchAmount = " + twitchAmount
   };
-  int ystart = 100;
+  int ystart = 220;
   for (int i=0; i<msg.length; i++) {
-    text(msg[i], 10, ystart+(i*16));
+    text(msg[i], 20, ystart+(i*16));
   }
 
   drawSignal();
@@ -306,19 +333,13 @@ void mouseReleased() {
 
 
 // ---------------------------------------------------------------
+boolean pen1 = false;
+boolean pen2 = false;
 void keyPressed() {
 
   switch(key) {
   case 'q':
     hektorRequestQueueReport();
-    break;
-
-  case '0':
-    buttonLightOff();
-    break;
-
-  case '1':
-    buttonLightOn();
     break;
 
   case 'I':
@@ -347,12 +368,14 @@ void keyPressed() {
     hektorJogRaw(5, 0);
     break;
 
-  case 'p':
-    dualPenSetPen(2, true);
+  case '1':
+    pen1 = !pen1;
+    dualPenSetPen(1, pen1);
     break;
 
-  case 'o':
-    dualPenSetPen(2, false);
+  case '2':
+    pen2 = !pen2;
+    dualPenSetPen(2, pen2);
     break;
 
   case 'H':

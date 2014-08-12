@@ -5,8 +5,10 @@
  **************************/
 
 Serial dualPenPort;
-String DUALPEN_SERIAL_PORT = "/dev/tty.usbmodem26091";
+//String DUALPEN_SERIAL_PORT = "/dev/tty.usbmodem26091";
+String DUALPEN_SERIAL_PORT = "/dev/tty.usbmodem26021";
 int DUALPEN_SERIAL_SPEED = 115200;
+
 
 void dualPenSetup() {
   if (!useDualPen) {

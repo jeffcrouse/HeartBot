@@ -8,25 +8,24 @@
 // v 1.01
 //thingiverse.com/joo   wiki.fablab-nuernberg.de
 
-
+// calibration for bot1 or bot2:
+#define BOT2
+// comment out for regular serial mode
+//#define CALIBRATION
 
 /* servos on teensy 3.1 digital pins:
-
- plotter 1 (right)
-     servo A (left): 17  
-     servo B (right): 16 
-     servo C (lift): 15
-     
- plotter 2 (left)
-     servo A (left): 22
-     servo B (right): 21
-     servo C (lift): 20
+defined in setup()
 
 */
 #include <Servo.h> 
 
 
+
 Servo s1a, s1b, s1l, s2a, s2b, s2l;
+
+// -------- BOT1 CALIBRATION -----------------------
+
+#ifdef BOT1
 
 int servofaktor = 630;
 
@@ -50,15 +49,38 @@ int s1liftUp = 1300;
 float geom2L1 = 35;
 float geom2L2 = 57;
 float geom2L3 = 15;
-/*
+
+
+#else 
+
+
+// -------- BOT2 CALIBRATION -----------------------
+
+int servofaktor = 630;
+
+int s2aNull = 2350;
+int s2bNull = 850;
+int s2liftWrite = 1690;
+int s2writeVariance = 80; // amount to vary pressure in response to p1p/p2p command
+int s2liftUp = 1490;
+  
 float geom1L1 = 35;   // mm from servo to elbow joint
-float geom1L2 = 110;  // elbow to pen point (projected vertically)
-float geom1L3 = 75;   // wrist joint to pen (projected vertically)
+float geom1L2 = 57;  // elbow to pen point (projected vertically)
+float geom1L3 = 15;// wrist joint to pen (projected vertically)
+
+
+int s1aNull = 2100;
+int s1bNull = 600;
+int s1liftWrite = 1500;
+int s1writeVariance = 90;
+int s1liftUp = 1300;
 
 float geom2L1 = 35;
-float geom2L2 = 110;
-float geom2L3 = 75;
-*/
+float geom2L2 = 57;
+float geom2L3 = 15;
+
+
+#endif
 
 // origin points of left and right servo (same on both sides)
 #define O1X 22
@@ -80,15 +102,28 @@ void setup() {
   Serial.println("dual pen crab here");
   
   serialBuffer.reserve(200);
-  
+
+#ifdef BOT1
+// BOT1 servo connections
   s1a.attach(17);
   s1b.attach(16);
   s1l.attach(15);
-  s1l.writeMicroseconds(s1liftUp);
   
   s2a.attach(22);
   s2b.attach(21);
   s2l.attach(20);
+#else
+// BOT2 servo connections
+  s1a.attach(2);
+  s1b.attach(3);
+  s1l.attach(4);
+  
+  s2a.attach(12);
+  s2b.attach(11);
+  s2l.attach(9);
+#endif
+  
+  s1l.writeMicroseconds(s1liftUp);
   s2l.writeMicroseconds(s2liftUp);
   
   set_XY_1(30,30);
@@ -283,27 +318,17 @@ void loop() {
 boolean writing = false;
 
 void loop2() {
-  /*
-  int xx = 10;
-  
-  writing = !writing;
-  write_1(false);
-  
-  set_XY_1(20+xx,30);
+#ifdef CALIBRATION
+
+  // Servohorns will have 90° between movements, parallel to x and y axis
+  set_XY_1(-3, 29.2);
+  set_XY_2(-3, 29.2);
   delay(500);
-  set_XY_1(20+xx,40);
-  delay(500);
-  set_XY_1(10+xx,40);
-  delay(500);
-  set_XY_1(10+xx,30);
+  set_XY_1(74.1, 28);
+  set_XY_2(74.1, 28);
   delay(500);
 
-
-  write_2(true);
-  
-  set_XY_2(30,30);
-  */
-  //set_XY_2(30,30);
+#endif 
 }
 
 

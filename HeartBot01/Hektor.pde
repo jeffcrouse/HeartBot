@@ -58,9 +58,9 @@ float HOME_XY[] = {
 
 float CANVAS_OFFSET[] = {
   (HOME_XY[0]-36), (HOME_XY[1]-36) // calibration position is center of 6x6 foot drawing square
-};
+  };
 
-float HEKTOR_WIDTH = 115.0;  // separation between left and right motors
+  float HEKTOR_WIDTH = 115.0;  // separation between left and right motors
 float CARRIAGE_WIDTH = 3.5; // separation between left and right supports on carriage
 
 Serial tinyg;
@@ -161,14 +161,16 @@ void hektorSerialEvent(String data) {
     int qr = Integer.parseInt(m[1]);
     hektorQueueLength = 28 - qr;
     //println("Hektor queue: " + hektorQueueLength);
-  } 
+  }
 }
 
 void hektorRequestQueueReport() {
+  if (!useHektor) return;
   tinyg.write("$QR\n");
 }
 
 void hektorMotorsOff() {
+  if (!useHektor) return;
   tinyg.write("$md\n");
 }
 

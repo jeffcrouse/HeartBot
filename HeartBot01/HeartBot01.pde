@@ -3,7 +3,7 @@ import controlP5.*;
 
 
 ControlP5 cp5;
-String props = "bot.properties";
+String props = "p5.properties";
 
 PFont font;
 boolean drawingInProgress = false;
@@ -53,10 +53,11 @@ void setup() {
   textFont(font, 14);
 
   cp5 = new ControlP5(this);
+  //cp5.getProperties().setFormat( ControllerProperties.Format.SERIALIZED );
 
   moduleChooser = cp5.addRadioButton("moduleChooser")
     .setPosition(20, 50)
-      .setSize(20, 20)
+      .setSize(40, 20)
         .setColorForeground(color(120))
           .setColorActive(color(255))
             .setColorLabel(color(255))
@@ -105,17 +106,14 @@ void controlEvent(ControlEvent theEvent) {
 
   if (theEvent.isFrom(moduleChooser)) {
     println("Saving Properties to "+props);
-    cp5.saveProperties(props);
   } else  if (theEvent.isFrom(pen1pressure)) {
     float pressure = pen1pressure.getValue();
-    println( "pen1pressure = "+pressure);
+    //println( "pen1pressure = "+pressure);
     dualPenPressure(1, pressure);
-    cp5.saveProperties(props);
   } else if (theEvent.isFrom(pen2pressure)) {
     float pressure = pen2pressure.getValue();
     dualPenPressure(2, pressure);
-    println( "pen2pressure = "+pressure);
-    cp5.saveProperties(props);
+    //println( "pen2pressure = "+pressure);
   }
 }
 
@@ -284,7 +282,7 @@ void pre() {
       mayanPrepCircle();
     } else if (cmd == "mayan circle") {
       mayanDrawCircle();
-    } else if( cmd == "mayan persist") {
+    } else if ( cmd == "mayan persist") {
       mayanPersist();
     } else {
       println("WARNING: unknown command"+cmd);
@@ -423,6 +421,10 @@ void keyPressed() {
     hektorMotorsOff();
     break;
 
+
+  case 'S':
+    cp5.saveProperties(props);
+    break;
 
   default:
     break;

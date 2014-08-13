@@ -9,8 +9,9 @@
 //----------------------------------------------------
 void onButtonUp() {
   println("Button Up");
-  
-  if(!hektor_homed) return;
+
+  //if(drawingInProgress) return;
+  if (!hektor_homed) return;
   int module = int(moduleChooser.getValue());
   switch(module) {
   case 1: 
@@ -27,6 +28,9 @@ void onButtonUp() {
     break;
   case 5: 
     doVortex(); 
+    break;
+  case 6:
+    doMayan();
     break;
   }
 }

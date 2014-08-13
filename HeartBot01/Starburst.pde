@@ -36,9 +36,10 @@ boolean starburstIndexUsed(int idx) {
   return false;
 }
 
+
 void doStarburst() {
 
-  if(starburstUsedIndices.size()>=50) {
+  if(starburstUsedIndices.size()>=starburstNumLines) {
     println("WARNING: Canvas is full!");
     return;
   }
@@ -94,11 +95,13 @@ void doStarburst() {
   commands.add( "starburst circle prep" );
   commands.add( "wait for queue" );
 
-  commands.add( "starburst twitch2 start" );
+  //commands.add( "starburst twitch2 start" );
+  
+  commands.add( "pen1 down" );
   commands.add( "starburst circle" );
   commands.add( "wait for queue" );
   
-  commands.add( "starburst twitch2 end" );
+  //commands.add( "starburst twitch2 end" );
 
   commands.add( "pen2 up" );
    commands.add( "pen1 up" );
@@ -115,6 +118,8 @@ void doStarburst() {
 
 void starburstTwitch() {
   twitchAmount = map(Sensor, 212, 1024, -1, 1);
+  //twitchAmount = beat ? -1 : 1;
+  
   twitchAmount *= map(moves.size(), 0, starburstLine.length, 1, 0.25);
   twitchAngle = starburstAngle - radians(90);
 

@@ -31,12 +31,14 @@ RadioButton moduleChooser;
 Slider pen1pressure;
 Slider pen2pressure;
 
+
 // ---------------------------------------------------------------
 void setup() {
   println(Serial.list());
   loadPersist();
   starburstSetup();
   vortexSetup();
+  mayanSetup();
   circlesSetup();
   hektorSetup(); // takes 20-30 seconds!
   dualPenSetup();
@@ -51,21 +53,22 @@ void setup() {
   textFont(font, 14);
 
   cp5 = new ControlP5(this);
-  
+
   moduleChooser = cp5.addRadioButton("moduleChooser")
     .setPosition(20, 50)
-      .setSize(40, 20)
+      .setSize(20, 20)
         .setColorForeground(color(120))
           .setColorActive(color(255))
             .setColorLabel(color(255))
-              .setItemsPerRow(5)
+              .setItemsPerRow(6)
                 .setSpacingColumn(50)
                   .addItem("circles", 1)
                     .addItem("fishbone", 2)
                       .addItem("starburst", 3)
                         .addItem("triangles", 4)
                           .addItem("vortex", 5)
-                            ;
+                            .addItem("mayan", 6)
+                              ;
 
   pen1pressure = cp5.addSlider("pen1pressure")
     .setPosition(20, 100)
@@ -99,7 +102,7 @@ void savePersist() {
 
 // ---------------------------------------------------------------
 void controlEvent(ControlEvent theEvent) {
-  
+
   if (theEvent.isFrom(moduleChooser)) {
     println("Saving Properties to "+props);
     cp5.saveProperties(props);
@@ -123,6 +126,8 @@ void onBeatUp() {
   if (doTwitch) {
     if (twitchStyle == "starburst") {
       starburstOnBeatUp();
+    } else if ( twitchStyle == "mayan") {
+      mayanOnBeatUp();
     }
   }
 }
@@ -133,6 +138,8 @@ void onBeatDown() {
   if (doTwitch) {
     if (twitchStyle == "starburst") {
       starburstOnBeatDown();
+    } else if ( twitchStyle == "mayan") {
+      mayanOnBeatDown();
     }
   }
 }
@@ -156,6 +163,8 @@ void pre() {
       circlesTwitch();
     } else if ( twitchStyle == "starburst2") {
       starburstTwitch2();
+    } else if ( twitchStyle == "mayan") {
+      mayanTwitch();
     } else {
       println("twitch style unknown: "+twitchStyle);
     }
@@ -267,6 +276,16 @@ void pre() {
       fishbonePrepCircle();
     } else if ( cmd == "fishbone draw circle") {
       fishboneDrawCircle();
+    } else if ( cmd == "mayan line prep" ) {
+      mayanPrepLine();
+    } else if (cmd == "mayan line" ) {
+      mayanDrawLine();
+    } else if (cmd == "mayan circle prep" ) {
+      mayanPrepCircle();
+    } else if (cmd == "mayan circle") {
+      mayanDrawCircle();
+    } else if( cmd == "mayan persist") {
+      mayanPersist();
     } else {
       println("WARNING: unknown command"+cmd);
     }
@@ -386,6 +405,10 @@ void keyPressed() {
     break;
 
 
+  case 't':
+    doTestPattern();
+    break;
+
   case '+':
     dualPenSetPen(1, true);
     dualPenSetPen(2, true);
@@ -482,16 +505,16 @@ void makeCircle() {
 // ---------------------------------------------------------------
 // x, y in range 0.0 to 1.0
 void movePlatform(float x, float y, float speed) {
-    
-  if(x>1) x = 1.0;
-  if(x<0) x = 0.0;
-  if(y>1) y = 1.0;
-  if(y<0) y = 0.0;
-  
-  
-  
-  float platformX = x * 72 + 22;
-  float platformY = y * 72 + 22;
+
+  if (x>1) x = 1.0;
+  if (x<0) x = 0.0;
+  if (y>1) y = 1.0;
+  if (y<0) y = 0.0;
+
+
+
+  float platformX = x * 72 + CANVAS_OFFSET[0];
+  float platformY = y * 72 + CANVAS_OFFSET[1];
   //println("Hektor to "+x+", "+y + ", => " + platformX + ", " + platformY + " - enabled? " + useHektor);
   hektorGotoXY(platformX, platformY, speed);
 }

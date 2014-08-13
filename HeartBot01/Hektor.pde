@@ -48,16 +48,16 @@ float jog = 4; // inches
 
 //float HOME_BELT[] = {-58, 59}; // right, left belt lengths when homed (right belt has negative length)
 float HOME_BELT[] = {
-  73, -71
+  77, -79 // RIGHT, LEFT!
 }; // right, left belt lengths when homed (motors face canvas, left belt has negative length)
 int REVERSE = -1;
 
 float HOME_XY[] = {
-  54, 46.5
+  56.5, 56
 };  // XY position (right, down from left motor) when homed
 
 float CANVAS_OFFSET[] = {
-  22, 22
+  (HOME_XY[0]-36), (HOME_XY[1]-36) // calibration position is center of 6x6 foot drawing square
 };
 
 float HEKTOR_WIDTH = 115.0;  // separation between left and right motors

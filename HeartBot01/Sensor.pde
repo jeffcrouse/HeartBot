@@ -8,7 +8,7 @@
 
 Serial sPort;
 //String sPortName = "/dev/tty.AdafruitEZ-Link3290-SPP";
-String sPortName = "/dev/tty.usbmodem14541";
+String sPortName = "/dev/tty.usbmodem145241";
 
 int Sensor;      // HOLDS PULSE SENSOR DATA FROM ARDUINO
 int IBI;         // HOLDS TIME BETWEN HEARTBEATS FROM ARDUINO

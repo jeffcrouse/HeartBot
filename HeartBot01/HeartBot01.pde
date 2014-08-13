@@ -10,8 +10,8 @@ boolean drawingInProgress = false;
 
 
 boolean useSensor = true;      // ATTENTION!!!   Set this to false to disable the sensor altogether
-boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
-boolean useDualPen = true;
+boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
+boolean useDualPen = false;
 
 JSONObject persist;
 
@@ -84,6 +84,10 @@ void setup() {
           ;
 
   cp5.loadProperties(props);
+}
+
+boolean sketchFullScreen() {
+  return true;
 }
 
 // ---------------------------------------------------------------

@@ -1,4 +1,4 @@
-
+  
 
 boolean recording = false;
 boolean playing = false;
@@ -23,6 +23,7 @@ void toggleRecording() {
   } else {
     Recording.clear();
     recording = true;
+    lastRecording = millis();
   }
 }
 
@@ -42,10 +43,14 @@ void togglePlayback() {
   }
 }
 
+int lastRecording;
 void doRecord(String inData) {
   if (!recording) return;
+  int delta = millis() - lastRecording;
   
-  Recording.add( inData );
+  Recording.add(  inData + "," + str(delta) );
+  
+  lastRecording = millis();
 }
 
 
@@ -53,13 +58,16 @@ void doPlayback() {
 
   while (true) {
     try {
-
+      long sleep = 1000;
       if (playing && PlaybackStrings.length>0) {
-        sensorSerialEvent( PlaybackStrings[pf] );
+
+        String[] pieces = split(PlaybackStrings[pf], ",");
+        sensorSerialEvent( pieces[0] );
+        sleep = int( pieces[1] );
         pf = (pf+1) % PlaybackStrings.length;
       }
 
-      long sleep = (long)map(playbackSpeed, 0, 100, 100, 20);
+      sleep *= playbackSpeed;
       Thread.sleep(sleep);
     } 
     catch(Exception e) {

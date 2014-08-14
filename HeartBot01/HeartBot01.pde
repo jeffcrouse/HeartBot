@@ -96,7 +96,7 @@ void setup() {
   y += 40;
   cp5.addSlider("playbackSpeed")
     .setPosition(x, y)
-      .setRange(0, 100)
+      .setRange(0.25, 2.0)
         .setSize(300, 20);
 
   y += 40;
@@ -548,7 +548,7 @@ void serialEvent(Serial port) {
 
     if (port==tinyg) {
       hektorSerialEvent(inData);
-    } else if (useSensor && port==sPort) {
+    } else if (useSensor && port==sPort && !playing) {
       sensorSerialEvent(inData);
     }
   } 

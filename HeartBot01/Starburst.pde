@@ -117,11 +117,11 @@ void doStarburst() {
 }
 
 void starburstTwitch() {
-  twitchAmount = map(Sensor, 212, 1024, -1, 1);
+  float twitchAmount = map(Sensor, 212, 1024, -1, 1);
   //twitchAmount = beat ? -1 : 1;
   
   twitchAmount *= map(moves.size(), 0, starburstLine.length, 1, 0.25);
-  twitchAngle = starburstAngle - radians(90);
+  float twitchAngle = starburstAngle - radians(90);
 
   dualPenTwitch(1, twitchAmount, twitchAngle);
   dualPenTwitch(2, 0.5, 1.0);

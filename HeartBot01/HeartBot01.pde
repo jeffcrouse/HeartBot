@@ -8,12 +8,9 @@ String props = "p5.properties";
 PFont font;
 boolean drawingInProgress = false;
 
-
-boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
-boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
-boolean useDualPen = false;
-
-JSONObject persist;
+boolean useSensor = true;      // ATTENTION!!!   Set this to false to disable the sensor altogether
+boolean useHektor = true;      // MORE ATTENTION! false to disable hektorbot
+boolean useDualPen = true;
 
 // Global Hektor speed -- used whenever coords are put into the Hektor queue by the "moves" ArrayList
 float platformSpeed = 1.0;
@@ -21,15 +18,24 @@ float platformSpeed = 1.0;
 // Global twitch variales. 
 boolean doTwitch;
 String twitchStyle;
-float twitchAngle;
-float twitchAmount;
 
+String cmd = "";
 ArrayList<String> commands = new ArrayList<String>(); // meta-command strings
 ArrayList<PVector> moves = new ArrayList<PVector>();  // platform move commands (because the tinyg can only hold 20, this holds the rest)
+ArrayList<String> warnings = new ArrayList<String>(); // text warnings to draw on screen.
 
 RadioButton moduleChooser;
 Slider pen1pressure;
 Slider pen2pressure;
+
+float squishX = 0;
+float squishY = 0;
+
+
+// ---------------------------------------------------------------
+boolean sketchFullScreen() {
+  return false;
+}
 
 
 // ---------------------------------------------------------------
@@ -46,7 +52,7 @@ void setup() {
   dualPenSetup();
   sensorSetup();
 
-  size(700, 600);  // Stage size
+  size(1200, 800);  // Stage size
   frameRate(100);  
   smooth();
 
@@ -57,8 +63,10 @@ void setup() {
   cp5 = new ControlP5(this);
   //cp5.getProperties().setFormat( ControllerProperties.Format.SERIALIZED );
 
+  int x = 20;
+  int y = 20;
   moduleChooser = cp5.addRadioButton("moduleChooser")
-    .setPosition(20, 50)
+    .setPosition(x, y)
       .setSize(40, 20)
         .setColorForeground(color(120))
           .setColorActive(color(255))
@@ -72,30 +80,41 @@ void setup() {
                           .addItem("vortex", 5)
                             .addItem("mayan", 6)
                               ;
-
+  y += 40;
   pen1pressure = cp5.addSlider("pen1pressure")
-    .setPosition(20, 100)
+    .setPosition(x, y)
       .setRange(-1, 1)
         .setSize(300, 20)
           ;
-
+  y += 40;
   pen2pressure = cp5.addSlider("pen2pressure")
-    .setPosition(20, 150)
+    .setPosition(x, y)
       .setRange(-1, 1)
         .setSize(300, 20)
           ;
 
+  y += 40;
   cp5.addSlider("playbackSpeed")
-    .setPosition(20, 200)
+    .setPosition(x, y)
       .setRange(0, 100)
+        .setSize(300, 20);
+
+  y += 40;
+  cp5.addSlider("squishX")
+    .setPosition(x, y)
+      .setRange(0, 0.2)
+        .setSize(300, 20);
+
+  y += 40;
+  cp5.addSlider("squishY")
+    .setPosition(x, y)
+      .setRange(0, 0.2)
         .setSize(300, 20);
 
   cp5.loadProperties(props);
 }
 
-boolean sketchFullScreen() {
-  return false;
-}
+JSONObject persist;
 
 // ---------------------------------------------------------------
 void loadPersist() {
@@ -111,6 +130,7 @@ void loadPersist() {
 void savePersist() {
   saveJSONObject(persist, "data/persist.json");
 }
+
 
 // ---------------------------------------------------------------
 void controlEvent(ControlEvent theEvent) {
@@ -187,11 +207,9 @@ void pre() {
 
   // If there are any commands to process, process them.
   if (commands.size() > 0) {
-    String cmd = commands.get(0);
+    cmd = commands.get(0);
     boolean cmdFinished = true;
 
-    if (cmd=="wait for queue" || cmd=="null") print('.');
-    else println(cmd);
 
     if (cmd == "pen1 up") {
       dualPenSetPen(1, false);
@@ -301,6 +319,14 @@ void pre() {
 
     if (cmdFinished)  commands.remove(0);
   }
+
+
+  warnings.clear();
+  if (useHektor && !hektor_homed) warnings.add("HEKTOR NOT HOMED");
+  if (!useSensor) warnings.add("SENSOR/BUTTON DISABLED");
+  if (!useHektor) warnings.add("HEKTOR DISABLED");
+  if (!useDualPen) warnings.add("DUAL PEN DISABLED");
+  if (drawingInProgress) warnings.add("DRAWING IN PROGRESS");
 }
 
 // ---------------------------------------------------------------
@@ -308,46 +334,82 @@ void draw() {
   background(51);
   fill(#FFFFFF);
   noStroke();
-
-  String msg[] = {
-    "FrameRate = "+int(frameRate), 
-    "drawingInProgress = " + (drawingInProgress ? "YES" : "NO"), 
-    "BPM = "+BPM, 
-    "IBI = "+IBI, 
-    "Signal = "+Sensor, 
-    "Mean = "+Mean, 
-    "StdDev = "+StdDev, 
-    "StdDevThreshCounter = "+StdDevThreshCounter, 
-    "hektorQueueLength = "+hektorQueueLength, 
-    "commands.size() = "+commands.size(), 
-    "moves.size() = " + moves.size(), 
-    "current command = " + (commands.size()>0 ? commands.get(0) : ""), 
-    "twitchAngle = " + degrees(twitchAngle), 
-    "twitchAmount = " + twitchAmount
-  };
-  int ystart = 220;
-  for (int i=0; i<msg.length; i++) {
-    text(msg[i], 20, ystart+(i*16));
-  }
-
+  text(int(frameRate)+"fps", width-40, 12);
+  /*
+   String msg[] = {
+   , 
+   "BPM = "+BPM, 
+   "IBI = "+IBI, 
+   "Signal = "+Sensor, 
+   //"Mean = "+Mean, 
+   //"StdDev = "+StdDev, 
+   //"StdDevThreshCounter = "+StdDevThreshCounter, 
+   "hektorQueueLength = "+hektorQueueLength, 
+   "commands.size() = "+commands.size(), 
+   "moves.size() = " + moves.size(), 
+   //"twitchAngle = " + degrees(twitchAngle), 
+   //"twitchAmount = " + twitchAmount
+   };
+   int ystart = 320;
+   for (int i=0; i<msg.length; i++) {
+   text(msg[i], 20, ystart+(i*16));
+   }
+   */
+  drawMoves();
+  drawCommands();
+  drawWarnings();
   drawSignal();
   drawHeart(width-30, height/2);
-
-
-
   recordPlaybackDraw();
+}
 
+// ---------------------------------------------------------------
+void drawCommands() {
+  pushStyle();
+  noStroke();
+  fill(#FFFFFF);
+  textFont(font, 14);
 
-  if (!hektor_homed) {
-    String s = "NOT HOMED!";
-    pushStyle();
-    noStroke();
-    fill(#FF0000);
-    textFont(font, 28);
-    float x = (width/2.0) - (textWidth(s)/2.0);
-    text(s, x, height/2.0);
-    popStyle();
+  int x = 10;
+  int y = height-30;
+  int i = commands.size()-1;
+  while(i > -1) {
+    text(commands.get(i), x, y);
+    y -= 16;
+    i--;
   }
+  text(cmd, x, height-10);
+  popStyle();
+}
+
+// ---------------------------------------------------------------
+void drawWarnings() {
+  if (warnings.size()<1) return;
+  pushStyle();
+  noStroke();
+  fill(#FF0000);
+  textFont(font, 28);
+  String s = "WARNING: \n";
+  for (int i=0; i<warnings.size (); i++) {
+    s += warnings.get(i)+"\n";
+  }
+  text(s, (width/2.0) - (textWidth(s)/2.0), height/2.0);
+  popStyle();
+}
+
+// ---------------------------------------------------------------
+void drawMoves() {
+  if (moves.size()<1) return;
+  pushStyle();
+  beginShape();
+  noFill();
+  stroke(200, 200, 200);
+  for (int i=0; i<moves.size (); i++) {
+    PVector p = moves.get(i);
+    vertex(p.x*width, p.y*height);
+  }
+  endShape();
+  popStyle();
 }
 
 
@@ -425,7 +487,6 @@ void keyPressed() {
     dualPenHome(2);
     break;
 
-
   case 't':
     doTestPattern();
     break;
@@ -447,6 +508,10 @@ void keyPressed() {
 
   case 'S':
     cp5.saveProperties(props);
+    break;
+
+  case 'B':
+    onButtonUp();
     break;
 
   default:
@@ -525,18 +590,24 @@ void makeCircle() {
   }
 }
 
+// ---------------------------------------------------------------
+float clamp(float n, float min, float max) {
+  if (n<=min) return min;
+  if (n>=max) return max;
+  return n;
+}
 
+// ---------------------------------------------------------------
+float clamp(float n) {
+  return clamp(n, 0, 1);
+}
 
 // ---------------------------------------------------------------
 // x, y in range 0.0 to 1.0
 void movePlatform(float x, float y, float speed) {
 
-  if (x>1) x = 1.0;
-  if (x<0) x = 0.0;
-  if (y>1) y = 1.0;
-  if (y<0) y = 0.0;
-
-
+  x = map(clamp(x), 0, 1, squishX, 1-squishX);
+  y = map(clamp(y), 0, 1, squishY, 1-squishY);
 
   float platformX = x * 72 + CANVAS_OFFSET[0];
   float platformY = y * 72 + CANVAS_OFFSET[1];

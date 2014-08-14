@@ -54,8 +54,8 @@ void doVortex() {
 }
 
 void vortexTwitch() {
-  twitchAmount = map(Sensor, 212, 1024, -1, 1);
-  twitchAngle = map(moves.size(), vortexCircle.length, 0, radians(-90), radians(270));
+  float twitchAmount = map(Sensor, 212, 1024, -1, 1);
+  float twitchAngle = map(moves.size(), vortexCircle.length, 0, radians(-90), radians(270));
   dualPenTwitch(1, twitchAmount, twitchAngle);
 
   float amt = cos(millis()/1000.0) * 0.5;

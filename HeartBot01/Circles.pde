@@ -104,8 +104,8 @@ void doCircles() {
 }
 
 void circlesTwitch() {
-  twitchAmount = map(Sensor, 212, 1024, -1, 1);
-  twitchAngle = map(moves.size(), vortexCircle.length, 0, 0, PI*2);
+  float twitchAmount = map(Sensor, 212, 1024, -1, 1);
+  float twitchAngle = map(moves.size(), vortexCircle.length, 0, 0, PI*2);
   dualPenTwitch(1, twitchAmount, twitchAngle);
 }
 

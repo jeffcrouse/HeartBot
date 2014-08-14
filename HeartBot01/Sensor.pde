@@ -38,16 +38,16 @@ void sensorSetup() {
 
 //----------------------------------------------------
 void sensorSerialEvent(String inData) {
-  
+
   if (inData.charAt(0) == 'S') {          // leading 'S' for sensor data
+    doRecord(inData);
     inData = inData.substring(1);        // cut off the leading 'S'
     Sensor = int(inData);                // convert the string to usable int
-    doRecord(inData);
   } else  if (inData.charAt(0) == 'B') {          // leading 'B' for BPM data
+    doRecord(inData);
     inData = inData.substring(1);        // cut off the leading 'B'
     BPM = int(inData);                   // convert the string to usable int
     beat = true;                         // set beat flag to advance heart rate graph
-    doRecord(inData);
   } else if (inData.charAt(0) == 'Q') {            // leading 'Q' means IBI data 
     inData = inData.substring(1);        // cut off the leading 'Q'
     IBI = int(inData);                   // convert the string to usable int
@@ -94,7 +94,6 @@ void sensorUpdate() {
     StdDevThreshCounter=0;
   }
 
-
   // If we have gotten a heartbeat from the sensor, do some stuff.
   if (beat) {
     beatCounter = 20;
@@ -128,7 +127,7 @@ void drawSignal() {
   beginShape();                             
   for (int i = 0; i < Signal.size (); i++) {
     float x = map(i, 0, BufferSize, 0, width-50);
-    float y = map(Signal.get(i), 0, 1024, height-100, 100);
+    float y = map(Signal.get(i), 0, 1024, height-1, height-200);
     vertex(x, y);
   }
   endShape();

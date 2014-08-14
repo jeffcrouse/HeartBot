@@ -1,7 +1,7 @@
 
 
 PVector mayanLine[] = new PVector[30];
-PVector mayanCircle[] = new PVector[40];
+PVector mayanCircle[] = new PVector[360];
 
 JSONArray mayanUsedIndices;
 int mayanTotal = 50; // total number of things to draw
@@ -40,7 +40,7 @@ void doMayan() {
   while (mayanIndexUsed (mayanIndex));
 
   mayanAngle = map(mayanIndex, 0, mayanTotal, 0, PI*2);
-  float endRadius = random(0.35, 0.4);
+  float endRadius = random(0.4, 0.45);
 
   for (int i=0; i<starburstLine.length; i++) {
     float dist = map(i, 0, mayanLine.length, 0.075, endRadius);
@@ -49,7 +49,7 @@ void doMayan() {
     mayanLine[i] = new PVector(x, y);
   }
 
-  mayanRadius = map(mayanIndex, 0, mayanTotal, 0.15, 0.3);
+  mayanRadius = map(mayanIndex, 0, mayanTotal, 0.1, 0.4);
   for (int i=0; i<mayanCircle.length; i++) {
     float angle = map(i, 0, mayanCircle.length, mayanAngle, mayanAngle+TWO_PI);
     float x = 0.5 + cos(angle) * mayanRadius;
@@ -112,10 +112,10 @@ void mayanOnBeatDown() {
 }
 
 void mayanTwitch() {
-  twitchAmount = map(Sensor, 212, 1024, -1, 1);
-
+  float twitchAmount = map(Sensor, 212, 1024, -1, 1);
   twitchAmount *= map(moves.size(), 0, mayanLine.length, 1, 0.25);
-  twitchAngle = mayanAngle - radians(90);
+  
+  float twitchAngle = mayanAngle - radians(90);
 
   dualPenTwitch(1, twitchAmount, twitchAngle);
   dualPenTwitch(2, 0.5, 1.0);

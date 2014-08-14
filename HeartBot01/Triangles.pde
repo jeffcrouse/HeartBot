@@ -3,7 +3,7 @@
 PVector corners[] = new PVector[3];
 float triangleStartAngle;
 float angles[] = new float[3];
-
+float triangleTwitch;
 
 void doTriangles() {
 
@@ -71,8 +71,8 @@ void doTriangles() {
 
 // ------------------------------------
 void trianglesTwitch() {
-  twitchAmount = map(Sensor, 212, 1024, -1, 1);
-  dualPenTwitch(1, twitchAmount, twitchAngle);
+  float twitchAmount = map(Sensor, 212, 1024, -1, 1);
+  dualPenTwitch(1, twitchAmount, triangleTwitch);
   
    float t = millis();
   dualPenSetPen(2, cos(t) > 0);
@@ -86,19 +86,19 @@ void trianglePrep() {
 
 // ------------------------------------
 void trianglesOne() {
-  twitchAngle = angles[2];
+  triangleTwitch = angles[2];
   moves.add( corners[1] );
 }
 
 // ------------------------------------
 void trianglesTwo() {
-  twitchAngle = angles[0];
+  triangleTwitch = angles[0];
   moves.add( corners[2] );
 }
 
 // ------------------------------------
 void trianglesThree() {
-  twitchAngle = angles[1];
+  triangleTwitch = angles[1];
   moves.add( corners[0] );
 }
 

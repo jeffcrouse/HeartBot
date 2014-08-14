@@ -18,6 +18,7 @@ void toggleRecording() {
     String []strings = new String[Recording.size()];
     Recording.toArray(strings);
     saveStrings(recFilename, strings);
+    println("Saving data to "+recFilename);
     recording = false;
   } else {
     Recording.clear();
@@ -36,6 +37,7 @@ void togglePlayback() {
     playing = false;
   } else {
     PlaybackStrings = loadStrings(recFilename);
+    println("Loaded "+PlaybackStrings.length+" strings");
     playing = true;
   }
 }
@@ -53,11 +55,11 @@ void doPlayback() {
     try {
 
       if (playing && PlaybackStrings.length>0) {
-        sensorSerialEvent(PlaybackStrings[pf]);
-        pf = (pf+1) %  PlaybackStrings.length;
+        sensorSerialEvent( PlaybackStrings[pf] );
+        pf = (pf+1) % PlaybackStrings.length;
       }
 
-      long sleep = (long)map(playbackSpeed, 0, 100, 200, 10);
+      long sleep = (long)map(playbackSpeed, 0, 100, 100, 20);
       Thread.sleep(sleep);
     } 
     catch(Exception e) {

@@ -2,7 +2,8 @@
 PVector points[] = new PVector[5];
 
 void doTestPattern() {
- 
+   if(drawingInProgress) return;
+   
   float margin = 0.05;
 
   points[0] = new PVector( margin, margin);
@@ -20,14 +21,12 @@ void doTestPattern() {
 
 
 void doLine(int from, int to) {
-  
+  float x, y, amt;
   for(int i=0; i<100; i++) {
-    float amt = float(i) / 100.0;
-    PVector p = new PVector();
-    p.x = points[from].x + ((points[to].x - points[from].x) * amt); 
-    p.y = points[from].y + ((points[to].y - points[from].y) * amt);
-    //println( p );
-    moves.add( p );
+    amt = float(i) / 100.0;
+    x = lerp(points[from].x, points[to].x, amt); //points[from].x + ((points[to].x - points[from].x) * amt); 
+    y = lerp(points[from].y, points[to].y, amt); //points[from].y + ((points[to].y - points[from].y) * amt);
+    moves.add( new PVector(x, y) );
   }
 }
 

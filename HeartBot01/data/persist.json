@@ -1,10 +1,7 @@
 {
-  "mayanUsedIndices": [
-    14,
-    9
-  ],
+  "mayanUsedIndices": [],
   "starburstUsedIndices": [],
   "vortexRadius": 0,
-  "starburstAngle": 0,
-  "circlesGrid": []
+  "circlesGrid": [],
+  "starburstAngle": 0
 }

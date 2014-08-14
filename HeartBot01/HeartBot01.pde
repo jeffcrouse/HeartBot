@@ -438,6 +438,7 @@ void keyPressed() {
   case 'r':
     toggleRecording();
     break;
+    
   case 'p':
     togglePlayback();
     break;

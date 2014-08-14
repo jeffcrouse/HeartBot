@@ -17,8 +17,13 @@ void setup() {
 }
 
 
+void loop() {
+  // loop_sevenBackInverted();
+  loop_backAndForthInverted();
+}
 
-void not_loop() {
+
+void loop_oneTwoOneTwo() {
   digitalWrite(13, boardLED ? 1 : 0);
   boardLED = !boardLED;
 
@@ -37,8 +42,12 @@ void not_loop() {
   lighted = (lighted+1) % NUM_PINS;
 }
 
+void loop_allOn() {
+  light(10,10,true);
+}
 
-void loop() {
+
+void loop_sevenBack() {
   int a=30, b=60, c=110;
   
   light(0,a);
@@ -52,10 +61,51 @@ void loop() {
   delay(c);
 }
 
+void loop_sevenBackInverted() {
+  int a=30, b=60, c=110;
+  
+  light(0,a, true);
+  light(1,a, true);
+  light(2,a, true);
+  delay(b);
+  light(3,a, true);
+  light(4,a, true);
+  light(5,a, true);
+  light(6,a, true);
+  delay(c);
+}
+
+void loop_backAndForthInverted() {
+  int a=30, b=40, c=110;
+  
+  light(0,a, true);
+  light(1,a, true);
+  light(2,a, true);
+  light(3,a, true);
+  light(4,a, true);
+  light(5,a, true);
+  light(6,a, true);  
+  light(-1,a, true);  
+  delay(b);
+  light(6,b, true);
+  light(5,b, true);
+  light(4,b, true);
+  light(3,b, true);
+  light(2,b, true);
+  light(1,b, true);
+  light(0,b, true);
+  light(-1,b,true);
+  delay(c);
+}
+
 void light(int which, int howlong) {
+  light(which, howlong, false);
+}
+
+void light(int which, int howlong, boolean reverse) {
   int m = 2;
   for (int i=0; i<NUM_PINS; i++) {
-    digitalWrite(myPins[i], which==i);
+    digitalWrite(myPins[i], which==i ? !reverse : reverse);
   }
   delay(howlong*m);
 }

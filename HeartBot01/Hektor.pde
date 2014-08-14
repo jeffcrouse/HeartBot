@@ -56,6 +56,11 @@ float HOME_XY[] = {
   56.75, 55.5
 };  // XY position (right, down from left motor) when homed
 
+// length of dangling weights
+// weights themselves are 4 inches tall
+// left: 53.5 inches from motor to top of weight
+// right: 55.5 inches
+
 float CANVAS_OFFSET[] = {
   (HOME_XY[0]-36), (HOME_XY[1]-36) // calibration position is center of 6x6 foot drawing square
   };

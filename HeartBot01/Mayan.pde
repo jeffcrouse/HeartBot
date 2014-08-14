@@ -27,6 +27,7 @@ boolean mayanIndexUsed(int idx) {
 }
 
 void doMayan() {
+
   twitchStyle = "mayan";
 
   if (mayanUsedIndices.size()>=mayanTotal) {
@@ -49,7 +50,7 @@ void doMayan() {
     mayanLine[i] = new PVector(x, y);
   }
 
-  mayanRadius = map(mayanIndex, 0, mayanTotal, 0.1, 0.4);
+  mayanRadius = map(mayanIndex, 0, mayanTotal, 0.1, 0.35);
   for (int i=0; i<mayanCircle.length; i++) {
     float angle = map(i, 0, mayanCircle.length, mayanAngle, mayanAngle+TWO_PI);
     float x = 0.5 + cos(angle) * mayanRadius;
@@ -61,8 +62,8 @@ void doMayan() {
   commands.add( "start drawing" );
   commands.add( "pen1 up" );
   commands.add( "pen2 up" );
-  commands.add( "pen1 home" );
-  commands.add( "pen2 home" );
+  //commands.add( "pen1 home" );
+  //commands.add( "pen2 home" );
   commands.add( "full speed" );
 
 

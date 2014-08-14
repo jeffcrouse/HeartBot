@@ -373,7 +373,7 @@ void drawCommands() {
   int x = 10;
   int y = height-30;
   int i = commands.size()-1;
-  while(i > -1) {
+  while (i > -1) {
     text(commands.get(i), x, y);
     y -= 16;
     i--;
@@ -505,6 +505,10 @@ void keyPressed() {
     hektorMotorsOff();
     break;
 
+  case 'c':
+    moves.clear();
+    commands.clear();
+    break;
 
   case 'S':
     cp5.saveProperties(props);
@@ -512,6 +516,12 @@ void keyPressed() {
 
   case 'B':
     onButtonUp();
+    break;
+
+  case 'P':
+    loadPersist();
+    mayanUsedIndices = persist.getJSONArray("mayanUsedIndices");
+    println(mayanUsedIndices);
     break;
 
   default:

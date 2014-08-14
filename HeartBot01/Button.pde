@@ -10,7 +10,7 @@
 void onButtonUp() {
   println("Button Up");
 
-  //if(drawingInProgress) return;
+  if(drawingInProgress) return;
   if (!hektor_homed) return;
   int module = int(moduleChooser.getValue());
   switch(module) {

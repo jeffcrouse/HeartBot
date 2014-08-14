@@ -48,12 +48,12 @@ float jog = 4; // inches
 
 //float HOME_BELT[] = {-58, 59}; // right, left belt lengths when homed (right belt has negative length)
 float HOME_BELT[] = {
-  77, -79 // RIGHT, LEFT!
+  -79.5, 78 // RIGHT, LEFT!
 }; // right, left belt lengths when homed (motors face canvas, left belt has negative length)
-int REVERSE = -1;
+int REVERSE = 1; // -1 if motors face towards wall
 
 float HOME_XY[] = {
-  56.5, 56
+  56.75, 55.5
 };  // XY position (right, down from left motor) when homed
 
 float CANVAS_OFFSET[] = {

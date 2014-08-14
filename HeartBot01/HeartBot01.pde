@@ -9,7 +9,7 @@ PFont font;
 boolean drawingInProgress = false;
 
 
-boolean useSensor = true;      // ATTENTION!!!   Set this to false to disable the sensor altogether
+boolean useSensor = false;      // ATTENTION!!!   Set this to false to disable the sensor altogether
 boolean useHektor = false;      // MORE ATTENTION! false to disable hektorbot
 boolean useDualPen = false;
 
@@ -35,6 +35,8 @@ Slider pen2pressure;
 // ---------------------------------------------------------------
 void setup() {
   println(Serial.list());
+  thread("doPlayback");
+
   loadPersist();
   starburstSetup();
   vortexSetup();
@@ -83,11 +85,16 @@ void setup() {
         .setSize(300, 20)
           ;
 
+  cp5.addSlider("playbackSpeed")
+    .setPosition(20, 200)
+      .setRange(0, 100)
+        .setSize(300, 20);
+
   cp5.loadProperties(props);
 }
 
 boolean sketchFullScreen() {
-  return true;
+  return false;
 }
 
 // ---------------------------------------------------------------
@@ -326,6 +333,11 @@ void draw() {
   drawSignal();
   drawHeart(width-30, height/2);
 
+
+
+  recordPlaybackDraw();
+
+
   if (!hektor_homed) {
     String s = "NOT HOMED!";
     pushStyle();
@@ -359,6 +371,13 @@ void keyPressed() {
   switch(key) {
   case 'q':
     hektorRequestQueueReport();
+    break;
+
+  case 'r':
+    toggleRecording();
+    break;
+  case 'p':
+    togglePlayback();
     break;
 
   case 'I':

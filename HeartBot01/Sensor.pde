@@ -38,20 +38,20 @@ void sensorSetup() {
 
 //----------------------------------------------------
 void sensorSerialEvent(String inData) {
+  
   if (inData.charAt(0) == 'S') {          // leading 'S' for sensor data
     inData = inData.substring(1);        // cut off the leading 'S'
     Sensor = int(inData);                // convert the string to usable int
-  }
-  if (inData.charAt(0) == 'B') {          // leading 'B' for BPM data
+    doRecord(inData);
+  } else  if (inData.charAt(0) == 'B') {          // leading 'B' for BPM data
     inData = inData.substring(1);        // cut off the leading 'B'
     BPM = int(inData);                   // convert the string to usable int
     beat = true;                         // set beat flag to advance heart rate graph
-  }
-  if (inData.charAt(0) == 'Q') {            // leading 'Q' means IBI data 
+    doRecord(inData);
+  } else if (inData.charAt(0) == 'Q') {            // leading 'Q' means IBI data 
     inData = inData.substring(1);        // cut off the leading 'Q'
     IBI = int(inData);                   // convert the string to usable int
-  }
-  if (inData.charAt(0) == 'P') {        // is the button up or down?
+  } else if (inData.charAt(0) == 'P') {        // is the button up or down?
     inData = inData.substring(1);
     Button = int(inData);
   }

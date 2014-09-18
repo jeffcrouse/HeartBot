@@ -76,7 +76,7 @@ void loop_sevenBackInverted() {
 }
 
 void loop_backAndForthInverted() {
-  int a=30, b=40, c=110;
+  int a=24, b=40, c=60;
   
   light(0,a, true);
   light(1,a, true);

@@ -96,7 +96,7 @@ void setup() {
   y += 40;
   cp5.addSlider("playbackSpeed")
     .setPosition(x, y)
-      .setRange(0, 100)
+      .setRange(0.25, 2.0)
         .setSize(300, 20);
 
   y += 40;
@@ -373,7 +373,7 @@ void drawCommands() {
   int x = 10;
   int y = height-30;
   int i = commands.size()-1;
-  while(i > -1) {
+  while (i > -1) {
     text(commands.get(i), x, y);
     y -= 16;
     i--;
@@ -438,6 +438,7 @@ void keyPressed() {
   case 'r':
     toggleRecording();
     break;
+    
   case 'p':
     togglePlayback();
     break;
@@ -505,6 +506,10 @@ void keyPressed() {
     hektorMotorsOff();
     break;
 
+  case 'c':
+    moves.clear();
+    commands.clear();
+    break;
 
   case 'S':
     cp5.saveProperties(props);
@@ -512,6 +517,12 @@ void keyPressed() {
 
   case 'B':
     onButtonUp();
+    break;
+
+  case 'P':
+    loadPersist();
+    mayanUsedIndices = persist.getJSONArray("mayanUsedIndices");
+    println(mayanUsedIndices);
     break;
 
   default:
@@ -548,7 +559,7 @@ void serialEvent(Serial port) {
 
     if (port==tinyg) {
       hektorSerialEvent(inData);
-    } else if (useSensor && port==sPort) {
+    } else if (useSensor && port==sPort && !playing) {
       sensorSerialEvent(inData);
     }
   } 

@@ -38,13 +38,13 @@ void sensorSetup() {
 
 //----------------------------------------------------
 void sensorSerialEvent(String inData) {
-
+   
   if (inData.charAt(0) == 'S') {          // leading 'S' for sensor data
-    doRecord(inData);
+    if(recording) doRecord(inData);
     inData = inData.substring(1);        // cut off the leading 'S'
     Sensor = int(inData);                // convert the string to usable int
   } else  if (inData.charAt(0) == 'B') {          // leading 'B' for BPM data
-    doRecord(inData);
+    if(recording) doRecord(inData);
     inData = inData.substring(1);        // cut off the leading 'B'
     BPM = int(inData);                   // convert the string to usable int
     beat = true;                         // set beat flag to advance heart rate graph
